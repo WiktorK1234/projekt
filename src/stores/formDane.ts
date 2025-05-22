@@ -8,9 +8,9 @@ interface FormSubmission {
   textDocument?: File;
   screenshots?: File[];
   videoReview?: File;
+  timestamp: number;
 }
 
-// Funkcja do serializacji File
 const replacer = (key: string, value: any) => {
   if (value instanceof File) {
     return {
@@ -33,12 +33,19 @@ const replacer = (key: string, value: any) => {
   return value;
 };
 
-// Funkcja do deserializacji File
 const reviver = (key: string, value: any) => {
   if (value?.__type === "File") {
-    return new File([], value.name, {
+    const file = new File([], value.name, {
       type: value.type,
       lastModified: value.lastModified,
+    });
+
+    return new Proxy(file, {
+      get(target, prop) {
+        if (prop === "name") return value.name;
+        if (prop === "size") return value.size;
+        return target[prop as keyof File];
+      },
     });
   }
   return value;
@@ -51,11 +58,23 @@ export const useFormStore = defineStore("formData", {
       reviver
     ) as FormSubmission[],
   }),
+
   actions: {
     addSubmission(payload: FormSubmission) {
       this.submissions.push(payload);
       this.saveToLocalStorage();
     },
+
+    updateSubmission(index: number, payload: FormSubmission) {
+      this.submissions[index] = payload;
+      this.saveToLocalStorage();
+    },
+
+    deleteSubmission(index: number) {
+      this.submissions.splice(index, 1);
+      this.saveToLocalStorage();
+    },
+
     saveToLocalStorage() {
       localStorage.setItem(
         "submissions",
@@ -63,6 +82,7 @@ export const useFormStore = defineStore("formData", {
       );
     },
   },
+
   getters: {
     getSubmissions: (state) => state.submissions,
   },

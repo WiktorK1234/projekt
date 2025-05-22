@@ -1,0 +1,354 @@
+<template>
+  <div class="container my-5">
+    <div class="modal fade" id="adminAuthModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-primary text-white">
+            <h5 class="modal-title">
+              <i class="bi bi-shield-lock me-2"></i>
+              Autoryzacja administratora
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Hasło administratora:</label>
+              <input
+                type="password"
+                class="form-control"
+                v-model="adminPasswordInput"
+                placeholder="Wprowadź hasło dostępu"
+                @keyup.enter="handleAdminAuth"
+              />
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Anuluj
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary"
+              @click="handleAdminAuth"
+            >
+              <i class="bi bi-key me-2"></i>Zaloguj
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal fade" id="deleteConfirmationModal" tabindex="-1">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              Potwierdzenie usunięcia
+            </h5>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+            ></button>
+          </div>
+          <div class="modal-body">
+            Czy na pewno chcesz usunąć tę recenzję? Tej operacji nie można
+            cofnąć!
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Anuluj
+            </button>
+            <button type="button" class="btn btn-danger" @click="confirmDelete">
+              <i class="bi bi-trash me-2"></i>
+              Usuń
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h1 class="text-primary">
+        <i class="bi bi-card-checklist me-3"></i>
+        Lista zgłoszonych recenzji
+      </h1>
+      <div>
+        <button
+          v-if="!isAdmin"
+          class="btn btn-outline-primary"
+          @click="authModal?.show()"
+        >
+          <i class="bi bi-shield-lock me-2"></i>
+          Logowanie administratora
+        </button>
+        <button v-else class="btn btn-outline-danger" @click="logoutAdmin">
+          <i class="bi bi-box-arrow-right me-2"></i>
+          Wyloguj
+        </button>
+      </div>
+    </div>
+
+    <div
+      class="alert alert-success alert-dismissible fade show"
+      role="alert"
+      v-if="showSuccessAlert"
+    >
+      Zmiany zostały pomyślnie zapisane!
+      <button
+        type="button"
+        class="btn-close"
+        @click="showSuccessAlert = false"
+      ></button>
+    </div>
+
+    <div class="row g-4">
+      <div
+        class="col-12"
+        v-for="(review, index) in formStore.getSubmissions"
+        :key="index"
+      >
+        <div class="card shadow-sm h-100">
+          <div class="card-header bg-info text-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <h5 class="card-title mb-0">
+                  {{ review.nickname }}
+                  <span class="fs-6 fw-normal"
+                    >({{ review.hoursPlayed }} godzin gry)</span
+                  >
+                </h5>
+                <p class="mb-0 small">{{ review.gameTitle }}</p>
+              </div>
+
+              <div class="btn-group">
+                <button
+                  class="btn btn-sm btn-outline-light"
+                  @click="toggleEditMode(index)"
+                  :disabled="editingIndex !== -1 && editingIndex !== index"
+                >
+                  <i
+                    class="bi"
+                    :class="editingIndex === index ? 'bi-save' : 'bi-pencil'"
+                  ></i>
+                </button>
+                <button
+                  class="btn btn-sm btn-outline-light"
+                  @click="handleDeleteReview(index)"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div v-if="editingIndex === index" class="edit-mode">
+              <textarea
+                class="form-control mb-3"
+                v-model="editContent"
+                rows="5"
+                placeholder="Wprowadź nową treść recenzji..."
+              ></textarea>
+
+              <div class="d-flex gap-2 justify-content-end">
+                <button
+                  class="btn btn-sm btn-outline-secondary"
+                  @click="cancelEdit"
+                >
+                  <i class="bi bi-x-circle me-2"></i>Anuluj
+                </button>
+                <button
+                  class="btn btn-sm btn-primary"
+                  @click="saveChanges(index)"
+                >
+                  <i class="bi bi-check-circle me-2"></i>Zapisz zmiany
+                </button>
+              </div>
+            </div>
+
+            <div v-else>
+              <p class="card-text pre-formatted">{{ review.review }}</p>
+
+              <div v-if="review.textDocument" class="mt-3">
+                <p class="mb-1 small text-muted">Załączony dokument:</p>
+                <span class="badge bg-info">
+                  <i class="bi bi-file-earmark-text me-2"></i>
+                  {{ review.textDocument?.name || "Brak nazwy" }}
+                  <span class="ms-2"
+                    >({{ formatSize(review.textDocument?.size) }})</span
+                  >
+                </span>
+              </div>
+
+              <div v-if="review.screenshots" class="mt-3">
+                <p class="mb-1 small text-muted">Zrzuty ekranu:</p>
+                <div class="d-flex flex-wrap gap-2">
+                  <span
+                    v-for="(screenshot, i) in review.screenshots"
+                    :key="i"
+                    class="badge bg-warning text-dark"
+                  >
+                    <i class="bi bi-image me-2"></i>
+                    {{ screenshot?.name || "Brak nazwy" }} ({{
+                      formatSize(screenshot?.size)
+                    }})
+                  </span>
+                </div>
+              </div>
+
+              <div v-if="review.videoReview" class="mt-3">
+                <p class="mb-1 small text-muted">Recenzja wideo:</p>
+                <span class="badge bg-danger">
+                  <i class="bi bi-film me-2"></i>
+                  {{ review.videoReview?.name || "Brak nazwy" }} ({{
+                    formatSize(review.videoReview?.size)
+                  }})
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-footer bg-light">
+            <small class="text-muted">
+              Zgłoszono:
+              {{ new Date(review.timestamp).toLocaleDateString("pl-PL") }}
+            </small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div
+      v-if="formStore.getSubmissions.length === 0"
+      class="alert alert-info mt-4"
+    >
+      <i class="bi bi-info-circle me-2"></i>
+      Brak zgłoszonych recenzji do wyświetlenia
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { ref, onMounted } from "vue";
+import { Modal } from "bootstrap";
+import { useFormStore } from "../stores/formDane";
+
+const formStore = useFormStore();
+const adminPasswordInput = ref("");
+const isAdmin = ref(localStorage.getItem("adminSession") === "active");
+const editingIndex = ref(-1);
+const editContent = ref("");
+const showSuccessAlert = ref(false);
+const reviewToDelete = ref<number | null>(null);
+
+let authModal: Modal | null = null;
+let deleteModal: Modal | null = null;
+
+const formatSize = (bytes: number | undefined) => {
+  if (!bytes || bytes === 0) return "0 B";
+  const units = ["B", "KB", "MB", "GB"];
+  const exp = Math.floor(Math.log(bytes) / Math.log(1024));
+  const size = (bytes / Math.pow(1024, exp)).toFixed(1);
+  return `${size} ${units[exp]}`;
+};
+
+onMounted(() => {
+  authModal = new Modal("#adminAuthModal");
+  deleteModal = new Modal("#deleteConfirmationModal");
+});
+
+const handleAdminAuth = () => {
+  if (adminPasswordInput.value === import.meta.env.VITE_admin) {
+    isAdmin.value = true;
+    localStorage.setItem("adminSession", "active");
+    authModal?.hide();
+  } else {
+    alert("Nieprawidłowe hasło!");
+    adminPasswordInput.value = "";
+  }
+};
+
+const logoutAdmin = () => {
+  isAdmin.value = false;
+  localStorage.removeItem("adminSession");
+  authModal?.hide();
+};
+
+const toggleEditMode = (index: number) => {
+  if (!isAdmin.value) {
+    authModal?.show();
+    return;
+  }
+
+  editingIndex.value = editingIndex.value === index ? -1 : index;
+  editContent.value = formStore.getSubmissions[index].review;
+};
+
+const saveChanges = (index: number) => {
+  formStore.updateSubmission(index, {
+    ...formStore.getSubmissions[index],
+    review: editContent.value,
+  });
+  editingIndex.value = -1;
+  showSuccessAlert.value = true;
+  setTimeout(() => (showSuccessAlert.value = false), 3000);
+};
+
+const cancelEdit = () => {
+  editingIndex.value = -1;
+  editContent.value = "";
+};
+
+const handleDeleteReview = (index: number) => {
+  if (!isAdmin.value) {
+    authModal?.show();
+    return;
+  }
+
+  reviewToDelete.value = index;
+  deleteModal?.show();
+};
+
+const confirmDelete = () => {
+  if (reviewToDelete.value !== null) {
+    formStore.deleteSubmission(reviewToDelete.value);
+    deleteModal?.hide();
+    reviewToDelete.value = null;
+  }
+};
+</script>
+
+<style scoped>
+.pre-formatted {
+  white-space: pre-wrap;
+}
+
+.alert-success {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.btn-outline-light:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.bi {
+  vertical-align: middle;
+}
+</style>

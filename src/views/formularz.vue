@@ -286,6 +286,7 @@ const onSubmit = handleSubmit(async (values) => {
       gameTitle: values.gameTitle,
       nickname: values.nickname,
       hoursPlayed: Number(values.hoursPlayed),
+      timestamp: Date.now(),
       review: values.review,
       textDocument: values.textDocument,
       screenshots: values.screenshots,
