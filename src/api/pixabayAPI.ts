@@ -18,6 +18,8 @@ export const searchImages = async (
         image_type: "photo",
         orientation: "horizontal",
         safesearch: true,
+        order: "latest",
+        page: 1,
       },
     });
 

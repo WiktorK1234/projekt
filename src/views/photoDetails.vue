@@ -50,15 +50,25 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { IPhoto } from "../models/IPhoto";
+import { usePhotoStore } from "../stores/photos";
 
 const route = useRoute();
 const router = useRouter();
-const photo = ref<IPhoto | null>(null);
+const photoStore = usePhotoStore();
+
 const loading = ref(true);
 const error = ref<string | null>(null);
+
+const photo = computed(() => {
+  const id = Number(route.params.id);
+  if (isNaN(id)) {
+    error.value = "Nieprawidłowe ID zdjęcia";
+    return null;
+  }
+  return photoStore.getPhotoById(id);
+});
 
 const aspectRatio = computed(() => {
   if (!photo.value) return "";
@@ -66,30 +76,20 @@ const aspectRatio = computed(() => {
   return ratio.toFixed(2) + ":1";
 });
 
-const loadCachedPhotos = (): IPhoto[] => {
-  try {
-    const cached = localStorage.getItem("galleryPhotos");
-    return cached ? JSON.parse(cached) : [];
-  } catch (e) {
-    console.error("Błąd odczytu cache:", e);
-    return [];
-  }
-};
-
 const goBack = () => {
   router.push("/gallery");
 };
 
-onMounted(() => {
+onMounted(async () => {
   try {
-    const id = Number(route.params.id);
-    if (isNaN(id)) throw new Error("Nieprawidłowe ID zdjęcia");
+    loading.value = true;
 
-    const allPhotos = loadCachedPhotos();
-    photo.value = allPhotos.find((p) => p.id === id) || null;
+    if (photoStore.allPhotos.length === 0) {
+      await photoStore.fetchPhotos();
+    }
 
     if (!photo.value) {
-      error.value = "Zdjęcie nie zostało znalezione w pamięci podręcznej";
+      error.value = "Zdjęcie nie zostało znalezione";
     }
   } catch (err) {
     error.value = err instanceof Error ? err.message : "Nieznany błąd";
