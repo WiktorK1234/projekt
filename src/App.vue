@@ -29,6 +29,24 @@
                 <i class="bi bi-images me-1"></i>Galeria
               </router-link>
             </li>
+            <li class="nav-item">
+              <router-link
+                to="/formularz"
+                class="nav-link px-3"
+                active-class="active"
+              >
+                <i class="bi bi-archive-fill me-1"></i>Formularz
+              </router-link>
+            </li>
+            <li class="nav-item">
+              <router-link
+                to="/recenzje"
+                class="nav-link px-3"
+                active-class="active"
+              >
+                <i class="bi bi-list-ul me-1"></i>Recenzje
+              </router-link>
+            </li>
           </ul>
         </div>
       </div>
