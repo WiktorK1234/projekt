@@ -42,4 +42,10 @@ const router = createRouter({
   routes,
 });
 
+router.afterEach((to) => {
+  if (__LOG_ENABLED__) {
+    console.info(`[Router] Przejście do: ${to.path}`);
+  }
+});
+
 export default router;

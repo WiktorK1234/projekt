@@ -108,7 +108,11 @@ import { useVisitCounterStore } from "@/stores/visitCounter";
 const visitCounter = useVisitCounterStore();
 
 onMounted(() => {
+  console.info("[Home] Komponent zamontowany");
+  console.debug("[Home] Aktualny stan licznika:", visitCounter.visitCount);
+
   visitCounter.increment();
+  console.log("[Home] Zaktualizowano licznik:", visitCounter.visitCount);
 });
 </script>
 

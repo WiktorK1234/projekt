@@ -61,6 +61,14 @@ export const useFormStore = defineStore("formData", {
 
   actions: {
     addSubmission(payload: FormSubmission) {
+      if (__LOG_ENABLED__) {
+        console.debug("[Store] Dodano nową recenzję:", {
+          user: payload.nickname,
+          game: payload.gameTitle,
+          chars: payload.review?.length || 0,
+        });
+      }
+
       this.submissions.push(payload);
       this.saveToLocalStorage();
     },

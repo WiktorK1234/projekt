@@ -88,9 +88,19 @@ const onSelect = (id: string) => {
 };
 
 onMounted(async () => {
+  console.info("[Gallery] Inicjalizacja galerii");
+
   photoStore.loadFromLocalStorage();
+  console.debug(
+    "[Gallery] Zdjęcia z localStorage:",
+    photoStore.allPhotos.length
+  );
+
   if (photoStore.allPhotos.length === 0) {
+    console.warn("[Gallery] Brak zdjęć - pobieranie z API...");
     await photoStore.fetchPhotos();
+  } else {
+    console.debug("[Gallery] Użyto zdjęć z cache");
   }
 });
 </script>

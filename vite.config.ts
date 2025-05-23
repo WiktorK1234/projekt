@@ -10,4 +10,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  define: {
+    __LOG_ENABLED__: JSON.stringify(process.env.NODE_ENV !== "production"),
+  },
 });

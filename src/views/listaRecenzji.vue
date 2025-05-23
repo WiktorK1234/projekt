@@ -323,11 +323,6 @@ const formatSize = (bytes: number | undefined) => {
   return `${size} ${units[exp]}`;
 };
 
-onMounted(() => {
-  authModal = new Modal("#adminAuthModal");
-  deleteModal = new Modal("#deleteConfirmationModal");
-});
-
 const handleAdminAuth = () => {
   if (adminPasswordInput.value === import.meta.env.VITE_admin) {
     isAdmin.value = true;
@@ -412,6 +407,14 @@ const confirmDelete = () => {
 
 watch(searchQuery, () => {
   currentPage.value = 1;
+});
+
+onMounted(() => {
+  console.info("[Recenzje] Komponent zamontowany");
+
+  authModal = new Modal("#adminAuthModal");
+  deleteModal = new Modal("#deleteConfirmationModal");
+  console.debug("[Recenzje] Zainicjowano modale:", authModal, deleteModal);
 });
 </script>
 

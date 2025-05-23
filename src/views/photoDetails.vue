@@ -81,18 +81,22 @@ const goBack = () => {
 };
 
 onMounted(async () => {
+  console.debug(
+    "[PhotoDetails] Komponent zamontowany, ID zdjęcia:",
+    route.params.id
+  );
+
   try {
     loading.value = true;
 
     if (photoStore.allPhotos.length === 0) {
+      console.info("[PhotoDetails] Brak zdjęć w store - pobieranie z API...");
       await photoStore.fetchPhotos();
     }
 
-    if (!photo.value) {
-      error.value = "Zdjęcie nie zostało znalezione";
-    }
+    console.debug("[PhotoDetails] Zdjęcie wczytane:", photo.value?.id);
   } catch (err) {
-    error.value = err instanceof Error ? err.message : "Nieznany błąd";
+    console.error("[PhotoDetails] Błąd ładowania:", err);
   } finally {
     loading.value = false;
   }
