@@ -132,7 +132,7 @@
     <div class="row g-4">
       <div
         class="col-12"
-        v-for="(review, index) in filteredReviews"
+        v-for="(review, index) in paginatedReviews"
         :key="index"
       >
         <div class="card shadow-sm h-100">
@@ -247,17 +247,57 @@
     </div>
 
     <div
-      v-if="formStore.getSubmissions.length === 0"
+      v-if="formStore.submissions.length === 0"
       class="alert alert-info mt-4"
     >
       <i class="bi bi-info-circle me-2"></i>
       Brak zgłoszonych recenzji do wyświetlenia
     </div>
+
+    <div class="d-flex justify-content-center mt-5" v-if="totalPages > 1">
+      <nav aria-label="Nawigacja paginacji">
+        <ul class="pagination">
+          <li class="page-item" :class="{ disabled: currentPage === 1 }">
+            <button
+              class="page-link"
+              @click="currentPage = currentPage - 1"
+              :disabled="currentPage === 1"
+            >
+              &laquo; Poprzednia
+            </button>
+          </li>
+
+          <li
+            v-for="page in totalPages"
+            :key="page"
+            class="page-item"
+            :class="{ active: currentPage === page }"
+          >
+            <button class="page-link" @click="currentPage = page">
+              {{ page }}
+            </button>
+          </li>
+
+          <li
+            class="page-item"
+            :class="{ disabled: currentPage === totalPages }"
+          >
+            <button
+              class="page-link"
+              @click="currentPage = currentPage + 1"
+              :disabled="currentPage === totalPages"
+            >
+              Następna &raquo;
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { Modal } from "bootstrap";
 import { useFormStore } from "../stores/formDane";
 
@@ -269,6 +309,8 @@ const editContent = ref("");
 const showSuccessAlert = ref(false);
 const reviewToDelete = ref<number | null>(null);
 const searchQuery = ref("");
+const itemsPerPage = ref(8);
+const currentPage = ref(1);
 
 let authModal: Modal | null = null;
 let deleteModal: Modal | null = null;
@@ -304,15 +346,25 @@ const logoutAdmin = () => {
 };
 
 const filteredReviews = computed(() => {
-  if (!searchQuery.value) return formStore.getSubmissions;
+  if (!searchQuery.value) return formStore.submissions;
 
   const query = searchQuery.value.toLowerCase();
-  return formStore.getSubmissions.filter((review) => {
+  return formStore.submissions.filter((review) => {
     return (
       review.nickname.toLowerCase().includes(query) ||
       review.gameTitle.toLowerCase().includes(query)
     );
   });
+});
+
+const totalPages = computed(() =>
+  Math.ceil(filteredReviews.value.length / itemsPerPage.value)
+);
+
+const paginatedReviews = computed(() => {
+  const start = (currentPage.value - 1) * itemsPerPage.value;
+  const end = start + itemsPerPage.value;
+  return filteredReviews.value.slice(start, end);
 });
 
 const toggleEditMode = (index: number) => {
@@ -322,12 +374,12 @@ const toggleEditMode = (index: number) => {
   }
 
   editingIndex.value = editingIndex.value === index ? -1 : index;
-  editContent.value = formStore.getSubmissions[index].review;
+  editContent.value = filteredReviews.value[index].review;
 };
 
 const saveChanges = (index: number) => {
   formStore.updateSubmission(index, {
-    ...formStore.getSubmissions[index],
+    ...formStore.submissions[index],
     review: editContent.value,
   });
   editingIndex.value = -1;
@@ -357,6 +409,10 @@ const confirmDelete = () => {
     reviewToDelete.value = null;
   }
 };
+
+watch(searchQuery, () => {
+  currentPage.value = 1;
+});
 </script>
 
 <style scoped>
