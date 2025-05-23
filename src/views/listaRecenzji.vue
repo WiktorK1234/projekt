@@ -115,10 +115,24 @@
       ></button>
     </div>
 
+    <div class="mb-4">
+      <div class="input-group">
+        <span class="input-group-text">
+          <i class="bi bi-search"></i>
+        </span>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Wyszukaj recenzje po autorze lub tytule gry..."
+          v-model="searchQuery"
+        />
+      </div>
+    </div>
+
     <div class="row g-4">
       <div
         class="col-12"
-        v-for="(review, index) in formStore.getSubmissions"
+        v-for="(review, index) in filteredReviews"
         :key="index"
       >
         <div class="card shadow-sm h-100">
@@ -243,7 +257,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { Modal } from "bootstrap";
 import { useFormStore } from "../stores/formDane";
 
@@ -254,6 +268,7 @@ const editingIndex = ref(-1);
 const editContent = ref("");
 const showSuccessAlert = ref(false);
 const reviewToDelete = ref<number | null>(null);
+const searchQuery = ref("");
 
 let authModal: Modal | null = null;
 let deleteModal: Modal | null = null;
@@ -287,6 +302,18 @@ const logoutAdmin = () => {
   localStorage.removeItem("adminSession");
   authModal?.hide();
 };
+
+const filteredReviews = computed(() => {
+  if (!searchQuery.value) return formStore.getSubmissions;
+
+  const query = searchQuery.value.toLowerCase();
+  return formStore.getSubmissions.filter((review) => {
+    return (
+      review.nickname.toLowerCase().includes(query) ||
+      review.gameTitle.toLowerCase().includes(query)
+    );
+  });
+});
 
 const toggleEditMode = (index: number) => {
   if (!isAdmin.value) {
@@ -350,5 +377,10 @@ const confirmDelete = () => {
 
 .bi {
   vertical-align: middle;
+}
+
+.input-group-text {
+  background-color: #f8f9fa;
+  border-color: #dee2e6;
 }
 </style>
