@@ -20,7 +20,7 @@
     </div>
 
     <h2 class="text-primary mb-4">Formularz recenzji</h2>
-    <form @submit.prevent="onSubmit">
+    <form @submit.prevent="onSubmit" :key="formKey">
       <div class="mb-3">
         <label for="gameTitle" class="form-label">Tytuł gry</label>
         <div class="input-group">
@@ -198,8 +198,8 @@ const popularGames = ref([
 const textDocumentFile = ref<File | null>(null);
 const isSubmitting = ref(false);
 const showSuccessMessage = ref(false);
-
 const hasTextDocument = computed(() => !!textDocumentFile.value);
+const formKey = ref(0);
 
 const schema = yup.object({
   gameTitle: yup.string().required("Podaj tytuł gry"),
@@ -297,7 +297,13 @@ const onSubmit = handleSubmit(async (values) => {
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
     resetForm();
+
+    setFieldValue("textDocument", null);
+    setFieldValue("screenshots", null);
+    setFieldValue("videoReview", null);
     textDocumentFile.value = null;
+
+    formKey.value++;
     showSuccessMessage.value = true;
   } catch (error) {
     console.error("Błąd podczas wysyłania:", error);

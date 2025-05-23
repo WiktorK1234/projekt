@@ -74,7 +74,6 @@ export const usePhotoStore = defineStore("photos", {
       const cached = localStorage.getItem("galleryPhotos");
       if (cached) {
         const parsed = JSON.parse(cached);
-        // Sortuj przy ładowaniu
         this.allPhotos = parsed.sort((a: IPhoto, b: IPhoto) => b.id - a.id);
       }
     },

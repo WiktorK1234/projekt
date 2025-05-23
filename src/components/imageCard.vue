@@ -30,7 +30,7 @@
       </transition>
     </div>
 
-    <div class="card-footer bg-primary bg-gradient text-white text-center py-2">
+    <div class="card-footer bg-info bg-gradient text-white text-center py-2">
       <h5 class="card-title mb-0 small">{{ author }}</h5>
     </div>
   </div>

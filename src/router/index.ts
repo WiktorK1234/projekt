@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import Home from "../views/home.vue";
 import Gallery from "../views/gallery.vue";
 import Formularz from "../views/formularz.vue";
-import Recenzje from "../components/listaRecenzji.vue";
+import Recenzje from "../views/listaRecenzji.vue";
 
 const routes = [
   {
