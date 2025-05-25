@@ -1,7 +1,6 @@
 export interface IPhoto {
   id: number;
-  webformatURL: string;
-  largeImageURL: string;
+  url: string;
   user: string;
   imageWidth: number;
   imageHeight: number;

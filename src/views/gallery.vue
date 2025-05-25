@@ -12,12 +12,23 @@
     </div>
 
     <div v-else>
+      <div
+        v-if="
+          photoStore.gamesPhotos.length === 0 &&
+          photoStore.charactersPhotos.length === 0
+        "
+        class="alert alert-warning mt-4"
+      >
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        Brak zdjęć do wyświetlenia. Spróbuj odświeżyć stronę.
+      </div>
+
       <div class="text-center mb-5">
         <h1 class="display-4 text-primary">
           Galeria zdjęć od naszych fanów!
           <i class="bi bi-heart-fill text-success me-2"></i>
         </h1>
-        <p class="lead">Zobacz zdjęcia wysłane do nas od naszych fanów</p>
+        <p class="lead">Zobacz zdjęcia wysłane do nas od naszej społeczności</p>
       </div>
 
       <div class="mb-5">
@@ -29,8 +40,9 @@
             class="col-12 col-sm-6 col-md-4 col-lg-3"
           >
             <ImageCard
+              v-if="photo.url && photo.url.trim() !== ''"
               :id="photo.id.toString()"
-              :download_url="photo.webformatURL"
+              :url="photo.url"
               :author="photo.user"
               @select="onSelect"
             />
@@ -39,13 +51,10 @@
         <div v-if="photoStore.gamesPhotos.length < 10" class="text-muted mt-3">
           (Wyświetlamy wszystkie dostępne zdjęcia w tej kategorii)
         </div>
-        <div v-else class="text-muted mt-3">
-          (Wyświetlamy najnowsze 10 zdjęć)
-        </div>
       </div>
 
       <div class="mb-5">
-        <h2 class="text-primary mb-4">👾 Postacie z gier wideo</h2>
+        <h2 class="text-primary mb-4">👾 Postacie z gier</h2>
         <div class="row g-4">
           <div
             v-for="photo in photoStore.charactersPhotos"
@@ -53,8 +62,9 @@
             class="col-12 col-sm-6 col-md-4 col-lg-3"
           >
             <ImageCard
+              v-if="photo.url && photo.url.trim() !== ''"
               :id="photo.id.toString()"
-              :url="photo.webformatURL"
+              :url="photo.url"
               :author="photo.user"
               @select="onSelect"
             />
@@ -65,9 +75,6 @@
           class="text-muted mt-3"
         >
           (Wyświetlamy wszystkie dostępne zdjęcia w tej kategorii)
-        </div>
-        <div v-else class="text-muted mt-3">
-          (Wyświetlamy najnowsze 10 zdjęć)
         </div>
       </div>
     </div>
@@ -88,19 +95,21 @@ const onSelect = (id: string) => {
 };
 
 onMounted(async () => {
-  console.info("[Gallery] Inicjalizacja galerii");
+  console.debug("[Gallery] Rozpoczęcie inicjalizacji galerii");
 
-  photoStore.loadFromLocalStorage();
-  console.debug(
-    "[Gallery] Zdjęcia z localStorage:",
-    photoStore.allPhotos.length
-  );
+  try {
+    photoStore.loadFromLocalStorage();
+    console.debug("[Gallery] Zdjęć w cache:", photoStore.allPhotos.length);
 
-  if (photoStore.allPhotos.length === 0) {
-    console.warn("[Gallery] Brak zdjęć - pobieranie z API...");
-    await photoStore.fetchPhotos();
-  } else {
-    console.debug("[Gallery] Użyto zdjęć z cache");
+    if (photoStore.allPhotos.length === 0) {
+      console.info("[Gallery] Pobieranie zdjęć z API...");
+      await photoStore.fetchPhotos();
+      console.debug("[Gallery] Pobrano zdjęć:", photoStore.allPhotos.length);
+    } else {
+      console.info("[Gallery] Użyto zdjęć z cache");
+    }
+  } catch (error) {
+    console.error("[Gallery] Błąd inicjalizacji:", error);
   }
 });
 </script>
@@ -111,7 +120,6 @@ onMounted(async () => {
   border: none;
   border-radius: 0.5rem;
   overflow: hidden;
-  cursor: pointer;
 }
 
 .card:hover {
@@ -122,5 +130,10 @@ onMounted(async () => {
 .spinner-border {
   width: 3rem;
   height: 3rem;
+}
+
+.alert-warning {
+  border: 1px solid #ffecb5;
+  background-color: #fff4d6;
 }
 </style>

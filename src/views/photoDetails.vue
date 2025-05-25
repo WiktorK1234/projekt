@@ -30,7 +30,7 @@
 
             <div class="ratio ratio-16x9 mb-4">
               <img
-                :src="photo.largeImageURL"
+                :src="photo.url"
                 :alt="photo.user"
                 class="img-fluid object-fit-cover"
               />

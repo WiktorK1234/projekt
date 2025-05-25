@@ -9,6 +9,7 @@ export const usePhotoStore = defineStore("photos", {
     error: null as string | null,
     lastFetch: null as number | null,
   }),
+
   actions: {
     async fetchPhotos() {
       try {
@@ -17,31 +18,43 @@ export const usePhotoStore = defineStore("photos", {
 
         if (!this.lastFetch || Date.now() - this.lastFetch > 3600000) {
           const [games, characters] = await Promise.all([
-            searchImages("video games", "games", 15),
-            searchImages("video game characters", "characters", 15),
+            this.fetchCategory("video games", "games", 20),
+            this.fetchCategory("video-game-character", "characters", 40),
           ]);
 
-          const processPhotos = (photos: IPhoto[], category: string) =>
-            photos
-              .filter((p) => p.category === category)
-              .sort((a, b) => b.id - a.id)
-              .slice(0, 10);
-
-          this.allPhotos = [
-            ...processPhotos(games, "games"),
-            ...processPhotos(characters, "characters"),
-          ];
-
+          this.allPhotos = [...games, ...characters];
           this.lastFetch = Date.now();
           this.saveToLocalStorage();
         }
       } catch (err) {
         this.error =
-          err instanceof Error ? err.message : "Błąd pobierania zdjęć";
-        throw err;
+          "Błąd pobierania zdjęć. Odśwież stronę lub spróbuj później.";
+        console.error(err);
       } finally {
         this.loading = false;
       }
+    },
+
+    async fetchCategory(
+      query: string,
+      category: "games" | "characters",
+      count: number
+    ) {
+      try {
+        const photos = await searchImages(query, category, count);
+        return photos.map((p) => ({
+          ...p,
+          user: p.user || "Anonymous",
+          url: p.url?.trim() || "",
+        }));
+      } catch (error) {
+        console.error(`Błąd pobierania ${category}:`, error);
+        return [];
+      }
+    },
+
+    filterCharacters(photos: IPhoto[]) {
+      return photos.filter((p) => p.category === "characters");
     },
 
     getPhotoById(id: number) {
@@ -73,16 +86,30 @@ export const usePhotoStore = defineStore("photos", {
     loadFromLocalStorage() {
       const cached = localStorage.getItem("galleryPhotos");
       if (cached) {
-        const parsed = JSON.parse(cached);
-        this.allPhotos = parsed.sort((a: IPhoto, b: IPhoto) => b.id - a.id);
+        try {
+          const parsed = JSON.parse(cached);
+          this.allPhotos = parsed.filter(
+            (photo: IPhoto) =>
+              photo?.url?.startsWith("https://") &&
+              (photo.category === "characters"
+                ? !photo.url.toLowerCase().includes("chess")
+                : true)
+          );
+        } catch (error) {
+          console.error("Błąd parsowania cache:", error);
+        }
       }
     },
   },
+
   getters: {
     gamesPhotos: (state) =>
       state.allPhotos.filter((p) => p.category === "games").slice(0, 10),
 
     charactersPhotos: (state) =>
-      state.allPhotos.filter((p) => p.category === "characters").slice(0, 10),
+      state.allPhotos
+        .filter((p) => p.category === "characters")
+        .slice(0, 10)
+        .sort((a, b) => b.id - a.id),
   },
 });
