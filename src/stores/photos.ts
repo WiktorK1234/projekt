@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { searchImages } from "@/api/pixabayAPI";
 import { IPhoto } from "@/models/IPhoto";
+import { useLoadingStore } from "@/stores/loading";
 
 export const usePhotoStore = defineStore("photos", {
   state: () => ({
@@ -12,9 +13,9 @@ export const usePhotoStore = defineStore("photos", {
 
   actions: {
     async fetchPhotos() {
+      const loading = useLoadingStore();
       try {
-        this.loading = true;
-        this.error = null;
+        loading.start();
 
         if (!this.lastFetch || Date.now() - this.lastFetch > 3600000) {
           const [games, characters] = await Promise.all([
@@ -25,13 +26,18 @@ export const usePhotoStore = defineStore("photos", {
           this.allPhotos = [...games, ...characters];
           this.lastFetch = Date.now();
           this.saveToLocalStorage();
+
+          console.log(
+            "[Photos] Zaktualizowano zdjęcia:",
+            this.allPhotos.length
+          );
         }
       } catch (err) {
         this.error =
           "Błąd pobierania zdjęć. Odśwież stronę lub spróbuj później.";
         console.error(err);
       } finally {
-        this.loading = false;
+        loading.stop();
       }
     },
 
@@ -58,7 +64,7 @@ export const usePhotoStore = defineStore("photos", {
     },
 
     getPhotoById(id: number) {
-      return this.allPhotos.find((photo) => photo.id === id);
+      return this.allPhotos.find((photo) => photo.id === id) || null;
     },
 
     addPhoto(newPhoto: IPhoto) {

@@ -172,6 +172,7 @@ import { useForm, Field, ErrorMessage } from "vee-validate";
 import * as yup from "yup";
 import { useFormStore } from "../stores/formDane";
 import { useNotificationsStore } from "@/stores/notyfikacje";
+import { useLoadingStore } from "@/stores/loading";
 
 const formStore = useFormStore();
 
@@ -268,8 +269,10 @@ const handleFileUpload = (event: Event, fieldName: string) => {
 };
 
 const onSubmit = handleSubmit(async (values) => {
+  const loading = useLoadingStore();
   isSubmitting.value = true;
   try {
+    loading.start();
     const submissionData = {
       gameTitle: values.gameTitle,
       nickname: values.nickname,
@@ -305,6 +308,7 @@ const onSubmit = handleSubmit(async (values) => {
       }
     );
   } finally {
+    loading.stop();
     isSubmitting.value = false;
   }
 });

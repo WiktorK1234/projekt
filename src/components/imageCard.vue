@@ -25,9 +25,16 @@
               <button
                 class="btn btn-light btn-sm rounded-pill px-3"
                 @click.stop="handleClick"
+                :disabled="localLoading"
               >
-                <i class="bi bi-zoom-in me-2"></i>
-                Zobacz szczegóły
+                <template v-if="!localLoading">
+                  <i class="bi bi-zoom-in me-2"></i>
+                  Zobacz szczegóły
+                </template>
+                <template v-else>
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                  Ładowanie...
+                </template>
               </button>
             </slot>
           </div>
@@ -43,8 +50,11 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
+import { useLoadingStore } from "@/stores/loading";
 
 const isHovered = ref(false);
+const loading = useLoadingStore();
+const localLoading = ref(false);
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -60,8 +70,19 @@ const props = defineProps({
 
 const emit = defineEmits(["select"]);
 
-const handleClick = () => {
-  emit("select", props.id);
+const handleClick = async () => {
+  localLoading.value = true;
+  try {
+    await Promise.all([
+      new Promise((resolve) => setTimeout(resolve, 300)),
+      new Promise((resolve) => {
+        emit("select", props.id);
+        resolve(true);
+      }),
+    ]);
+  } finally {
+    localLoading.value = false;
+  }
 };
 
 const isLoading = ref(true);
@@ -89,5 +110,13 @@ const isLoading = ref(true);
   align-items: center;
   justify-content: center;
   background: #f8f9fa;
+}
+
+.local-loading {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
 }
 </style>

@@ -288,6 +288,7 @@ import { ref, onMounted, computed, watch } from "vue";
 import { Modal } from "bootstrap";
 import { useFormStore } from "../stores/formDane";
 import { useNotificationsStore } from "@/stores/notyfikacje";
+import { useLoadingStore } from "@/stores/loading";
 
 const formStore = useFormStore();
 const adminPasswordInput = ref("");
@@ -299,6 +300,7 @@ const reviewToDelete = ref<number | null>(null);
 const searchQuery = ref("");
 const itemsPerPage = ref(8);
 const currentPage = ref(1);
+const loading = useLoadingStore();
 
 let authModal: Modal | null = null;
 let deleteModal: Modal | null = null;
@@ -311,15 +313,25 @@ const formatSize = (bytes: number | undefined) => {
   return `${size} ${units[exp]}`;
 };
 
-const handleAdminAuth = () => {
-  if (adminPasswordInput.value === import.meta.env.VITE_admin) {
-    isAdmin.value = true;
-    localStorage.setItem("adminSession", "active");
+const handleAdminAuth = async () => {
+  try {
+    await loading.wrapAsync(
+      new Promise((resolve, reject) => {
+        setTimeout(() => {
+          if (adminPasswordInput.value === import.meta.env.VITE_admin) {
+            resolve(true);
+            isAdmin.value = true;
+            localStorage.setItem("adminSession", "active");
+          } else {
+            reject(new Error("Invalid password"));
+          }
+        }, 800);
+      })
+    );
     authModal?.hide();
-  } else {
-    notifications.showToast("error", "Nieprawidłowe hasło administratora!", {
-      title: "Błąd autoryzacji",
-    });
+  } catch (error) {
+    notifications.showToast("error", "Nieprawidłowe hasło administratora!");
+    adminPasswordInput.value = "";
   }
 };
 
@@ -361,15 +373,21 @@ const toggleEditMode = (index: number) => {
   editContent.value = filteredReviews.value[index].review;
 };
 
-const saveChanges = (index: number) => {
-  formStore.updateSubmission(index, {
-    ...formStore.submissions[index],
-    review: editContent.value,
-  });
-  editingIndex.value = -1;
-  notifications.showToast("success", "Zmiany zostały pomyślnie zapisane!", {
-    timeout: 3000,
-  });
+const saveChanges = async (index: number) => {
+  try {
+    await loading.wrapAsync(
+      formStore.updateSubmission(index, {
+        ...formStore.submissions[index],
+        review: editContent.value,
+      })
+    );
+    notifications.showToast("success", "Zmiany zapisano pomyślnie!");
+
+    editingIndex.value = -1;
+    editContent.value = "";
+  } catch (error) {
+    notifications.showToast("error", "Błąd podczas zapisywania zmian");
+  }
 };
 
 const cancelEdit = () => {

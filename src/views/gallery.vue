@@ -86,13 +86,13 @@ import { onMounted } from "vue";
 import { useRouter } from "vue-router";
 import ImageCard from "../components/imageCard.vue";
 import { usePhotoStore } from "@/stores/photos";
+import { useLoadingStore } from "@/stores/loading";
+import { useNotificationsStore } from "@/stores/notyfikacje";
 
 const router = useRouter();
 const photoStore = usePhotoStore();
-
-const onSelect = (id: string) => {
-  router.push(`/photo/${id}`);
-};
+const loading = useLoadingStore();
+const notifications = useNotificationsStore();
 
 onMounted(async () => {
   console.debug("[Gallery] Rozpoczęcie inicjalizacji galerii");
@@ -102,16 +102,37 @@ onMounted(async () => {
     console.debug("[Gallery] Zdjęć w cache:", photoStore.allPhotos.length);
 
     if (photoStore.allPhotos.length === 0) {
-      console.info("[Gallery] Pobieranie zdjęć z API...");
+      console.info("[Gallery] Brak danych w cache - pobieranie z API");
       await photoStore.fetchPhotos();
       console.debug("[Gallery] Pobrano zdjęć:", photoStore.allPhotos.length);
     } else {
-      console.info("[Gallery] Użyto zdjęć z cache");
+      console.info("[Gallery] Używam zdjęć z cache");
     }
   } catch (error) {
     console.error("[Gallery] Błąd inicjalizacji:", error);
+    notifications.showToast("error", "Błąd ładowania galerii");
+  } finally {
+    console.info("[Gallery] Zakończono inicjalizację");
   }
 });
+
+const onSelect = async (id: string) => {
+  try {
+    console.debug("[Gallery] Próba nawigacji do zdjęcia:", id);
+
+    const photoExists = photoStore.getPhotoById(Number(id));
+    if (!photoExists) {
+      throw new Error("Zdjęcie nie istnieje");
+    }
+
+    await loading.wrapAsync(router.push(`/photo/${id}`));
+  } catch (error) {
+    console.error("[Gallery] Błąd nawigacji:", error);
+    notifications.showToast("error", "Błąd otwierania szczegółów");
+
+    router.push("/gallery");
+  }
+};
 </script>
 
 <style scoped>

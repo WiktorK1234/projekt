@@ -58,6 +58,18 @@
       </div>
     </main>
 
+    <div v-if="loading.isLoading" class="global-loader">
+      <div class="loader-content">
+        <div
+          class="spinner-border text-primary"
+          style="width: 3rem; height: 3rem"
+        >
+          <span class="visually-hidden">Ładowanie...</span>
+        </div>
+        <p class="mt-2 text-white">Trwa przetwarzanie...</p>
+      </div>
+    </div>
+
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
       <transition-group name="toast-transition">
         <template
@@ -140,9 +152,11 @@ import { ref, watch, nextTick } from "vue";
 import { Toast } from "bootstrap";
 import { useNotificationsStore } from "@/stores/notyfikacje";
 import type { ToastType } from "@/stores/notyfikacje";
+import { useLoadingStore } from "@/stores/loading";
 
 const notifications = useNotificationsStore();
 const toastElements = ref<HTMLElement[]>([]);
+const loading = useLoadingStore();
 
 const getDefaultTitle = (type: ToastType) => {
   return {
@@ -249,5 +263,35 @@ watch(
 .toast-leave-to {
   opacity: 0;
   transform: scale(0.8);
+}
+
+.global-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+}
+
+.loader-content {
+  text-align: center;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 </style>
