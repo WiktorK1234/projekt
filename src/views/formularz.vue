@@ -336,4 +336,19 @@ const cancel = () => {
     transform: translateX(0);
   }
 }
+
+@media (max-width: 576px) {
+  .form-label {
+    font-size: 0.9rem !important;
+  }
+
+  .form-control {
+    padding: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .btn {
+    font-size: 0.85rem;
+  }
+}
 </style>

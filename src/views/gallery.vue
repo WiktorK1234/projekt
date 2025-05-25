@@ -37,7 +37,7 @@
           <div
             v-for="photo in photoStore.gamesPhotos"
             :key="photo.id"
-            class="col-12 col-sm-6 col-md-4 col-lg-3"
+            class="col-6 col-sm-6 col-md-4 col-lg-3"
           >
             <ImageCard
               v-if="photo.url && photo.url.trim() !== ''"
@@ -59,7 +59,7 @@
           <div
             v-for="photo in photoStore.charactersPhotos"
             :key="photo.id"
-            class="col-12 col-sm-6 col-md-4 col-lg-3"
+            class="col-6 col-sm-6 col-md-4 col-lg-3"
           >
             <ImageCard
               v-if="photo.url && photo.url.trim() !== ''"
@@ -156,5 +156,22 @@ const onSelect = async (id: string) => {
 .alert-warning {
   border: 1px solid #ffecb5;
   background-color: #fff4d6;
+}
+
+@media (max-width: 400px) {
+  .col-6 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  .card-title {
+    font-size: 1.25rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .lead {
+    font-size: 1rem;
+  }
 }
 </style>

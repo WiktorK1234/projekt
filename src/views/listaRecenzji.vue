@@ -243,7 +243,7 @@
 
     <div class="d-flex justify-content-center mt-5" v-if="totalPages > 1">
       <nav aria-label="Nawigacja paginacji">
-        <ul class="pagination">
+        <ul class="pagination flex-wrap">
           <li class="page-item" :class="{ disabled: currentPage === 1 }">
             <button
               class="page-link"
@@ -449,5 +449,17 @@ onMounted(() => {
 .input-group-text {
   background-color: #f8f9fa;
   border-color: #dee2e6;
+}
+
+@media (max-width: 576px) {
+  .page-item {
+    margin: 2px;
+    flex-grow: 1;
+    text-align: center;
+  }
+
+  .page-link {
+    padding: 0.5rem;
+  }
 }
 </style>

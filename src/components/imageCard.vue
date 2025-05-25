@@ -6,12 +6,12 @@
     :class="{ 'shadow-lg': isHovered }"
     style="cursor: pointer; transition: all 0.2s ease"
   >
-    <div class="position-relative overflow-hidden">
+    <div class="ratio ratio-1x1">
       <img
         :src="url"
         :alt="author"
         class="card-img-top"
-        style="height: 200px; object-fit: cover"
+        style="object-fit: cover"
         loading="lazy"
       />
 

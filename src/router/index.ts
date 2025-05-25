@@ -3,6 +3,7 @@ import Home from "../views/home.vue";
 import Gallery from "../views/gallery.vue";
 import Formularz from "../views/formularz.vue";
 import Recenzje from "../views/listaRecenzji.vue";
+import PolitykaPrywatnosci from "../views/politykaPrywatnosci.vue";
 
 const routes = [
   {
@@ -30,6 +31,11 @@ const routes = [
     path: "/recenzje",
     name: "Recenzje",
     component: Recenzje,
+  },
+  {
+    path: "/polityka-prywatnosci",
+    name: "politykaPrywatnosci",
+    component: PolitykaPrywatnosci,
   },
   {
     path: "/:pathMatch(.*)*",

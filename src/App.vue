@@ -8,15 +8,26 @@
         <button
           class="navbar-toggler"
           type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarContent"
+          aria-controls="navbarContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+          @click="toggleNavbar"
         >
           <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarContent">
+        <div
+          class="collapse navbar-collapse"
+          id="navbarContent"
+          ref="navbarCollapseRef"
+        >
           <ul class="navbar-nav ms-auto">
             <li class="nav-item">
-              <router-link to="/" class="nav-link px-3" active-class="active">
+              <router-link
+                to="/"
+                class="nav-link px-3"
+                active-class="active"
+                @click="closeNavbarOnMobile"
+              >
                 <i class="bi bi-house-door me-1"></i>Home
               </router-link>
             </li>
@@ -25,6 +36,7 @@
                 to="/gallery"
                 class="nav-link px-3"
                 active-class="active"
+                @click="closeNavbarOnMobile"
               >
                 <i class="bi bi-images me-1"></i>Galeria
               </router-link>
@@ -34,6 +46,7 @@
                 to="/formularz"
                 class="nav-link px-3"
                 active-class="active"
+                @click="closeNavbarOnMobile"
               >
                 <i class="bi bi-archive-fill me-1"></i>Formularz
               </router-link>
@@ -43,6 +56,7 @@
                 to="/recenzje"
                 class="nav-link px-3"
                 active-class="active"
+                @click="closeNavbarOnMobile"
               >
                 <i class="bi bi-list-ul me-1"></i>Recenzje
               </router-link>
@@ -118,15 +132,28 @@
             <h5 class="fw-bold">Linki</h5>
             <ul class="list-unstyled">
               <li class="btn-group-vertical">
-                <button class="btn btn-outline-primary mb-2">
-                  <i class="bi bi-facebook me-2"></i> Facebook
-                </button>
-                <button class="btn btn-outline-warning mb-2">
-                  <i class="bi bi-instagram me-2"></i> Instagram
-                </button>
-                <router-link to="#" class="btn btn-outline-danger"
-                  >Polityka prywatności</router-link
+                <a
+                  href="https://www.facebook.com/"
+                  class="btn btn-outline-primary mb-2"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
+                  <i class="bi bi-facebook me-2"></i> Facebook
+                </a>
+                <a
+                  href="https://www.instagram.com/"
+                  class="btn btn-outline-warning mb-2"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <i class="bi bi-instagram me-2"></i> Instagram
+                </a>
+                <router-link
+                  to="/polityka-prywatnosci"
+                  class="btn btn-outline-danger"
+                >
+                  Polityka prywatności
+                </router-link>
               </li>
             </ul>
           </div>
@@ -148,15 +175,40 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick } from "vue";
-import { Toast } from "bootstrap";
+import { ref, watch, nextTick, onMounted, onBeforeUnmount } from "vue";
+import { Collapse, Toast } from "bootstrap";
 import { useNotificationsStore } from "@/stores/notyfikacje";
 import type { ToastType } from "@/stores/notyfikacje";
 import { useLoadingStore } from "@/stores/loading";
 
 const notifications = useNotificationsStore();
-const toastElements = ref<HTMLElement[]>([]);
 const loading = useLoadingStore();
+const toastElements = ref<HTMLElement[]>([]);
+const navbarCollapseRef = ref<HTMLElement | null>(null);
+let navbarCollapse: Collapse | null = null;
+
+onMounted(() => {
+  if (navbarCollapseRef.value) {
+    navbarCollapse = new Collapse(navbarCollapseRef.value, {
+      toggle: false,
+    });
+  }
+});
+
+const toggleNavbar = () => {
+  if (!navbarCollapse) return;
+
+  // Tylko rozwija menu jeśli jest zwinięte
+  if (!navbarCollapseRef.value?.classList.contains("show")) {
+    navbarCollapse.show();
+  }
+};
+
+const closeNavbarOnMobile = () => {
+  if (window.innerWidth < 992 && navbarCollapse) {
+    navbarCollapse.hide();
+  }
+};
 
 const getDefaultTitle = (type: ToastType) => {
   return {
@@ -204,13 +256,33 @@ watch(
 </script>
 
 <style>
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.15s;
+.navbar-collapse.collapsing {
+  height: auto;
+  transition: height 0.35s ease;
 }
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+
+@media (max-width: 991px) {
+  .navbar-collapse {
+    background-color: var(--bs-primary);
+    padding: 1rem;
+    margin-top: 0.5rem;
+    border-radius: 0.25rem;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  }
+
+  .nav-link {
+    padding: 0.75rem 1rem !important;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s;
+  }
+
+  .nav-link.active {
+    background-color: rgba(255, 255, 255, 0.15);
+  }
+
+  .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
 }
 
 .toast {
@@ -222,47 +294,7 @@ watch(
 
 .toast-header {
   padding: 0.75rem 1rem;
-  background-color: rgba(255, 255, 255, 0.85);
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.toast-body {
-  padding: 1rem;
-}
-
-.toast-success .toast-header {
-  color: #0f5132;
-  background-color: #d1e7dd;
-}
-
-.toast-error .toast-header {
-  color: #842029;
-  background-color: #f8d7da;
-}
-
-.toast-warning .toast-header {
-  color: #664d03;
-  background-color: #fff3cd;
-}
-
-.toast-info .toast-header {
-  color: #084298;
-  background-color: #cfe2ff;
-}
-
-.toast-enter-active,
-.toast-leave-active {
-  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-}
-
-.toast-enter-from {
-  opacity: 0;
-  transform: translateX(100%);
-}
-
-.toast-leave-to {
-  opacity: 0;
-  transform: scale(0.8);
 }
 
 .global-loader {
@@ -293,5 +325,30 @@ watch(
     opacity: 1;
     transform: scale(1);
   }
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.15s;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.toast-transition-enter-active,
+.toast-transition-leave-active {
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.toast-transition-enter-from {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+.toast-transition-leave-to {
+  opacity: 0;
+  transform: scale(0.8);
 }
 </style>

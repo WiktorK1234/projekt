@@ -35,27 +35,27 @@
           na najpopularniejsze platformy oraz unikalne edycje kolekcjonerskie.
         </p>
         <ul class="list-group list-group-flush mb-3">
-          <li class="list-group-item">
+          <li class="list-group-item text-break">
             <i class="bi bi-controller text-success me-2"></i>
             Gry cyfrowe i fizyczne w jednym miejscu
           </li>
-          <li class="list-group-item">
+          <li class="list-group-item text-break">
             <i class="bi bi-truck text-success me-2"></i>
             Szybka i bezpieczna dostawa produktów fizycznych
           </li>
-          <li class="list-group-item">
+          <li class="list-group-item text-break">
             <i class="bi bi-cloud-download text-success me-2"></i>
             Natychmiastowy dostęp do gier cyfrowych
           </li>
-          <li class="list-group-item">
+          <li class="list-group-item text-break">
             <i class="bi bi-star-fill text-success me-2"></i>
             Tylko sprawdzone i wysoko oceniane tytuły
           </li>
-          <li class="list-group-item">
+          <li class="list-group-item text-break">
             <i class="bi bi-tags-fill text-success me-2"></i>
             Regularne promocje i oferty specjalne
           </li>
-          <li class="list-group-item">
+          <li class="list-group-item text-break">
             <i class="bi bi-headset text-success me-2"></i>
             Pomoc techniczna i wsparcie klienta 7 dni w tygodniu
           </li>
@@ -75,19 +75,19 @@
           wydawnictwa, jak i niezależnych twórców.
         </p>
         <ul class="list-group list-group-flush mb-3">
-          <li class="list-group-item">
+          <li class="list-group-item text-break">
             <i class="bi bi-award text-success me-2"></i>
             Bogata biblioteka gier na różne platformy
           </li>
-          <li class="list-group-item">
+          <li class="list-group-item text-break">
             <i class="bi bi-award text-success me-2"></i>
             Atrakcyjne ceny i program lojalnościowy
           </li>
-          <li class="list-group-item">
+          <li class="list-group-item text-break">
             <i class="bi bi-award text-success me-2"></i>
             Intuicyjny interfejs i łatwość zakupów
           </li>
-          <li class="list-group-item">
+          <li class="list-group-item text-break">
             <i class="bi bi-award text-success me-2"></i>
             Społeczność graczy dzieląca się recenzjami i opiniami
           </li>
