@@ -163,19 +163,6 @@
         </button>
       </div>
     </form>
-
-    <div
-      v-if="showSuccessMessage"
-      class="alert alert-success alert-dismissible fade show"
-      role="alert"
-    >
-      Recenzja została pomyślnie wysłana!
-      <button
-        type="button"
-        class="btn-close"
-        @click="showSuccessMessage = false"
-      ></button>
-    </div>
   </div>
 </template>
 
@@ -184,6 +171,7 @@ import { ref, computed, watch } from "vue";
 import { useForm, Field, ErrorMessage } from "vee-validate";
 import * as yup from "yup";
 import { useFormStore } from "../stores/formDane";
+import { useNotificationsStore } from "@/stores/notyfikacje";
 
 const formStore = useFormStore();
 
@@ -197,7 +185,7 @@ const popularGames = ref([
 
 const textDocumentFile = ref<File | null>(null);
 const isSubmitting = ref(false);
-const showSuccessMessage = ref(false);
+const notifications = useNotificationsStore();
 const hasTextDocument = computed(() => !!textDocumentFile.value);
 const formKey = ref(0);
 
@@ -304,9 +292,18 @@ const onSubmit = handleSubmit(async (values) => {
     textDocumentFile.value = null;
 
     formKey.value++;
-    showSuccessMessage.value = true;
+    notifications.showToast("success", "Recenzja została pomyślnie wysłana!", {
+      title: "Sukces!",
+      timeout: 4000,
+    });
   } catch (error) {
-    console.error("Błąd podczas wysyłania:", error);
+    notifications.showToast(
+      "error",
+      "Wystąpił błąd podczas wysyłania recenzji.",
+      {
+        title: "Błąd!",
+      }
+    );
   } finally {
     isSubmitting.value = false;
   }
@@ -316,14 +313,6 @@ const cancel = () => {
   resetForm();
   textDocumentFile.value = null;
 };
-
-watch(showSuccessMessage, (newVal) => {
-  if (newVal) {
-    setTimeout(() => {
-      showSuccessMessage.value = false;
-    }, 5000);
-  }
-});
 </script>
 
 <style scoped>

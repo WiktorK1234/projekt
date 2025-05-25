@@ -102,19 +102,6 @@
       </div>
     </div>
 
-    <div
-      class="alert alert-success alert-dismissible fade show"
-      role="alert"
-      v-if="showSuccessAlert"
-    >
-      Zmiany zostały pomyślnie zapisane!
-      <button
-        type="button"
-        class="btn-close"
-        @click="showSuccessAlert = false"
-      ></button>
-    </div>
-
     <div class="mb-4">
       <div class="input-group">
         <span class="input-group-text">
@@ -300,13 +287,14 @@
 import { ref, onMounted, computed, watch } from "vue";
 import { Modal } from "bootstrap";
 import { useFormStore } from "../stores/formDane";
+import { useNotificationsStore } from "@/stores/notyfikacje";
 
 const formStore = useFormStore();
 const adminPasswordInput = ref("");
 const isAdmin = ref(localStorage.getItem("adminSession") === "active");
 const editingIndex = ref(-1);
 const editContent = ref("");
-const showSuccessAlert = ref(false);
+const notifications = useNotificationsStore();
 const reviewToDelete = ref<number | null>(null);
 const searchQuery = ref("");
 const itemsPerPage = ref(8);
@@ -329,8 +317,9 @@ const handleAdminAuth = () => {
     localStorage.setItem("adminSession", "active");
     authModal?.hide();
   } else {
-    alert("Nieprawidłowe hasło!");
-    adminPasswordInput.value = "";
+    notifications.showToast("error", "Nieprawidłowe hasło administratora!", {
+      title: "Błąd autoryzacji",
+    });
   }
 };
 
@@ -378,8 +367,9 @@ const saveChanges = (index: number) => {
     review: editContent.value,
   });
   editingIndex.value = -1;
-  showSuccessAlert.value = true;
-  setTimeout(() => (showSuccessAlert.value = false), 3000);
+  notifications.showToast("success", "Zmiany zostały pomyślnie zapisane!", {
+    timeout: 3000,
+  });
 };
 
 const cancelEdit = () => {

@@ -58,6 +58,39 @@
       </div>
     </main>
 
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+      <transition-group name="toast-transition">
+        <template
+          v-for="(toast, index) in notifications.activeToasts"
+          :key="toast.id"
+        >
+          <div
+            ref="toastElements"
+            class="toast"
+            :class="`bg-${toast.type} text-white`"
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+            :data-bs-delay="toast.timeout"
+          >
+            <div class="toast-header">
+              <i class="bi me-2" :class="getToastIcon(toast.type)"></i>
+              <strong class="me-auto">{{
+                toast.title || getDefaultTitle(toast.type)
+              }}</strong>
+              <button
+                type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="toast"
+                aria-label="Zamknij"
+              ></button>
+            </div>
+            <div class="toast-body">{{ toast.message }}</div>
+          </div>
+        </template>
+      </transition-group>
+    </div>
+
     <footer class="bg-dark text-white py-4 mt-auto">
       <div class="container">
         <div class="row">
@@ -102,10 +135,58 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: "App",
+<script setup lang="ts">
+import { ref, watch, nextTick } from "vue";
+import { Toast } from "bootstrap";
+import { useNotificationsStore } from "@/stores/notyfikacje";
+import type { ToastType } from "@/stores/notyfikacje";
+
+const notifications = useNotificationsStore();
+const toastElements = ref<HTMLElement[]>([]);
+
+const getDefaultTitle = (type: ToastType) => {
+  return {
+    success: "Sukces!",
+    error: "Błąd!",
+    warning: "Ostrzeżenie",
+    info: "Informacja",
+  }[type];
 };
+
+const getToastIcon = (type: ToastType) => {
+  return {
+    success: "bi-check-circle-fill text-success",
+    error: "bi-x-circle-fill text-danger",
+    warning: "bi-exclamation-triangle-fill text-warning",
+    info: "bi-info-circle-fill text-info",
+  }[type];
+};
+
+watch(
+  () => notifications.activeToasts,
+  async (newToasts) => {
+    await nextTick();
+
+    newToasts.forEach((toast, index) => {
+      const element = toastElements.value[index];
+      if (element && !(element as any)._toast) {
+        const bsToast = new Toast(element, {
+          autohide: true,
+          delay: toast.timeout,
+        });
+
+        (element as any)._toast = bsToast;
+
+        element.addEventListener("hidden.bs.toast", () => {
+          notifications.removeToast(toast.id);
+        });
+
+        bsToast.show();
+      }
+    });
+  },
+  { deep: true }
+);
 </script>
 
 <style>
@@ -116,5 +197,57 @@ export default {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+.toast {
+  min-width: 300px;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  background-color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.toast-header {
+  padding: 0.75rem 1rem;
+  background-color: rgba(255, 255, 255, 0.85);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.toast-body {
+  padding: 1rem;
+}
+
+.toast-success .toast-header {
+  color: #0f5132;
+  background-color: #d1e7dd;
+}
+
+.toast-error .toast-header {
+  color: #842029;
+  background-color: #f8d7da;
+}
+
+.toast-warning .toast-header {
+  color: #664d03;
+  background-color: #fff3cd;
+}
+
+.toast-info .toast-header {
+  color: #084298;
+  background-color: #cfe2ff;
+}
+
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.toast-enter-from {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+.toast-leave-to {
+  opacity: 0;
+  transform: scale(0.8);
 }
 </style>
