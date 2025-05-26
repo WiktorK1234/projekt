@@ -28,11 +28,11 @@
               >
                 <template v-if="!localLoading">
                   <i class="bi bi-zoom-in me-2"></i>
-                  Zobacz szczegóły
+                  {{ $t("gallery.viewDetails") }}
                 </template>
                 <template v-else>
                   <span class="spinner-border spinner-border-sm me-2"></span>
-                  Ładowanie...
+                  {{ $t("common.loading") }}
                 </template>
               </button>
             </slot>

@@ -6,10 +6,10 @@
         style="width: 3rem; height: 3rem"
         role="status"
       >
-        <span class="visually-hidden">Ładowanie...</span>
+        <span class="visually-hidden">{{ $t("common.loading") }}</span>
       </div>
       <div class="mt-3">
-        <h3 class="text-primary">Trwa wczytywanie zdjęcia...</h3>
+        <h3 class="text-primary">{{ $t("common.loadingMessage") }}</h3>
         <div
           class="progress mt-3 mx-auto"
           style="max-width: 300px; height: 8px"
@@ -30,20 +30,20 @@
       <div class="mt-3">
         <button @click="goBack" class="btn btn-outline-danger">
           <i class="bi bi-arrow-left me-2"></i>
-          Powrót do galerii
+          {{ $t("common.backToGallery") }}
         </button>
       </div>
     </div>
 
     <div v-else-if="!photo" class="alert alert-warning text-center">
-      Zdjęcie nie zostało znalezione
+      {{ $t("photo.notFound") }}
     </div>
 
     <div v-else class="row justify-content-center">
       <div class="col-lg-8">
         <div class="card shadow">
           <div class="card-body text-center">
-            <h2 class="card-title mb-4">Szczegóły zdjęcia</h2>
+            <h2 class="card-title mb-4">{{ $t("photo.details") }}</h2>
 
             <div class="ratio ratio-16x9 mb-4">
               <img
@@ -54,16 +54,24 @@
             </div>
 
             <div class="text-start">
-              <h5 class="mb-3">Autor: {{ photo.user }}</h5>
-              <p><strong>Wysokość:</strong> {{ photo.imageHeight }} px</p>
-              <p><strong>Szerokość:</strong> {{ photo.imageWidth }} px</p>
-              <p><strong>Proporcje:</strong> {{ aspectRatio }}</p>
+              <h5 class="mb-3">{{ $t("photo.author") }} {{ photo.user }}</h5>
+              <p>
+                <strong>{{ $t("photo.height") }}</strong>
+                {{ photo.imageHeight }} px
+              </p>
+              <p>
+                <strong>{{ $t("photo.width") }}</strong>
+                {{ photo.imageWidth }} px
+              </p>
+              <p>
+                <strong>{{ $t("photo.proportion") }}</strong> {{ aspectRatio }}
+              </p>
             </div>
 
             <div class="mt-4">
               <button @click="goBack" class="btn btn-outline-primary">
                 <i class="bi bi-arrow-left me-2"></i>
-                Powrót do galerii
+                {{ $t("common.backToGallery") }}
               </button>
             </div>
           </div>

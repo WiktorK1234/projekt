@@ -59,7 +59,7 @@ export const useFormStore = defineStore("formData", {
         });
       }
 
-      this.submissions.push(payload);
+      this.submissions.unshift(payload);
       this.saveToLocalStorage();
     },
 

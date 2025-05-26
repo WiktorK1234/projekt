@@ -3,7 +3,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
       <div class="container">
         <router-link to="/" class="navbar-brand fw-bold">
-          <i class="bi bi-controller me-2"></i>GameZone
+          <i class="bi bi-controller me-2"></i>{{ $t("brand") }}
         </router-link>
         <button
           class="navbar-toggler"
@@ -28,7 +28,7 @@
                 active-class="active"
                 @click="closeNavbarOnMobile"
               >
-                <i class="bi bi-house-door me-1"></i>Home
+                <i class="bi bi-house-door me-1"></i>{{ $t("navbar.home") }}
               </router-link>
             </li>
             <li class="nav-item">
@@ -38,7 +38,7 @@
                 active-class="active"
                 @click="closeNavbarOnMobile"
               >
-                <i class="bi bi-images me-1"></i>Galeria
+                <i class="bi bi-images me-1"></i>{{ $t("navbar.gallery") }}
               </router-link>
             </li>
             <li class="nav-item">
@@ -48,7 +48,7 @@
                 active-class="active"
                 @click="closeNavbarOnMobile"
               >
-                <i class="bi bi-archive-fill me-1"></i>Formularz
+                <i class="bi bi-archive-fill me-1"></i>{{ $t("navbar.form") }}
               </router-link>
             </li>
             <li class="nav-item">
@@ -58,8 +58,18 @@
                 active-class="active"
                 @click="closeNavbarOnMobile"
               >
-                <i class="bi bi-list-ul me-1"></i>Recenzje
+                <i class="bi bi-list-ul me-1"></i>{{ $t("navbar.reviews") }}
               </router-link>
+            </li>
+            <li class="nav-item">
+              <select
+                v-model="$i18n.locale"
+                class="form-select ms-2"
+                style="width: auto"
+              >
+                <option value="pl">Polski</option>
+                <option value="en">English</option>
+              </select>
             </li>
           </ul>
         </div>
@@ -78,9 +88,9 @@
           class="spinner-border text-primary"
           style="width: 3rem; height: 3rem"
         >
-          <span class="visually-hidden">Ładowanie...</span>
+          <span class="visually-hidden">{{ $t("common.loading") }}</span>
         </div>
-        <p class="mt-2 text-white">Trwa przetwarzanie...</p>
+        <p class="mt-2 text-white">{{ $t("common.loadingMessage") }}</p>
       </div>
     </div>
 
@@ -102,13 +112,13 @@
             <div class="toast-header">
               <i class="bi me-2" :class="getToastIcon(toast.type)"></i>
               <strong class="me-auto">{{
-                toast.title || getDefaultTitle(toast.type)
+                toast.title || $t(`toast.${toast.type}`)
               }}</strong>
               <button
                 type="button"
                 class="btn-close btn-close-white"
                 data-bs-dismiss="toast"
-                aria-label="Zamknij"
+                :aria-label="$t('common.close')"
               ></button>
             </div>
             <div class="toast-body">{{ toast.message }}</div>
@@ -121,15 +131,11 @@
       <div class="container">
         <div class="row">
           <div class="col-md-6">
-            <h5 class="fw-bold">Chcesz wiedzieć więcej?</h5>
-            <p class="mb-0">
-              Napisz do nas, zadzwoń lub śledź nas w mediach społecznościowych,
-              gdzie publikujemy najnowsze informacje związane z grami oraz ich
-              przecenami.
-            </p>
+            <h5 class="fw-bold">{{ $t("footer.contactHeader") }}</h5>
+            <p class="mb-0">{{ $t("footer.contactText") }}</p>
           </div>
           <div class="col-md-3">
-            <h5 class="fw-bold">Linki</h5>
+            <h5 class="fw-bold">{{ $t("footer.links") }}</h5>
             <ul class="list-unstyled">
               <li class="btn-group-vertical">
                 <a
@@ -152,13 +158,13 @@
                   to="/polityka-prywatnosci"
                   class="btn btn-outline-danger"
                 >
-                  Polityka prywatności
+                  {{ $t("footer.privacyPolicy") }}
                 </router-link>
               </li>
             </ul>
           </div>
           <div class="col-md-3">
-            <h5 class="fw-bold">Kontakt</h5>
+            <h5 class="fw-bold">{{ $t("footer.contactInfo") }}</h5>
             <ul class="list-unstyled">
               <li><i class="bi bi-envelope me-2"></i> GameZone@gmail.com</li>
               <li><i class="bi bi-phone me-2"></i> +48 123 456 789</li>
@@ -167,7 +173,7 @@
         </div>
         <hr class="my-4 bg-light" />
         <div class="text-center">
-          <p class="mb-0">&copy; 2023 GameZone. Wszelkie prawa zastrzeżone.</p>
+          <p class="mb-0">{{ $t("footer.copyright") }}</p>
         </div>
       </div>
     </footer>
@@ -175,12 +181,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, nextTick, onMounted, onBeforeUnmount } from "vue";
+import {
+  ref,
+  watch,
+  nextTick,
+  onMounted,
+  onBeforeUnmount,
+  computed,
+} from "vue";
 import { Collapse, Toast } from "bootstrap";
 import { useNotificationsStore } from "@/stores/notifications";
 import type { ToastType } from "@/stores/notifications";
 import { useLoadingStore } from "@/stores/loading";
+import { useI18n } from "vue-i18n";
 
+const { t } = useI18n();
 const notifications = useNotificationsStore();
 const loading = useLoadingStore();
 const toastElements = ref<HTMLElement[]>([]);

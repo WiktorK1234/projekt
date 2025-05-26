@@ -6,7 +6,7 @@
           <div class="modal-header bg-primary text-white">
             <h5 class="modal-title">
               <i class="bi bi-shield-lock me-2"></i>
-              Autoryzacja administratora
+              {{ $t("reviews.authorization") }}
             </h5>
             <button
               type="button"
@@ -16,13 +16,12 @@
           </div>
           <div class="modal-body">
             <div class="mb-3">
-              <label class="form-label">Hasło administratora:</label>
+              <label class="form-label">{{ $t("reviews.password") }}</label>
               <input
                 type="password"
                 class="form-control"
+                :placeholder="$t('reviews.enter')"
                 v-model="adminPasswordInput"
-                placeholder="Wprowadź hasło dostępu"
-                @keyup.enter="handleAdminAuth"
               />
             </div>
           </div>
@@ -32,14 +31,14 @@
               class="btn btn-secondary"
               data-bs-dismiss="modal"
             >
-              Anuluj
+              {{ $t("common.cancel") }}
             </button>
             <button
               type="button"
               class="btn btn-primary"
               @click="handleAdminAuth"
             >
-              <i class="bi bi-key me-2"></i>Zaloguj
+              <i class="bi bi-key me-2"></i>{{ $t("reviews.login") }}
             </button>
           </div>
         </div>
@@ -51,8 +50,8 @@
         <div class="modal-content">
           <div class="modal-header bg-danger text-white">
             <h5 class="modal-title">
-              <i class="bi bi-exclamation-triangle me-2"></i>
-              Potwierdzenie usunięcia
+              <i class="bi bi-exclamation-triangle me-2"></i
+              >{{ $t("reviews.deleteSuccess") }}
             </h5>
             <button
               type="button"
@@ -60,21 +59,17 @@
               data-bs-dismiss="modal"
             ></button>
           </div>
-          <div class="modal-body">
-            Czy na pewno chcesz usunąć tę recenzję? Tej operacji nie można
-            cofnąć!
-          </div>
+          <div class="modal-body">{{ $t("reviews.delete") }}</div>
           <div class="modal-footer">
             <button
               type="button"
               class="btn btn-secondary"
               data-bs-dismiss="modal"
             >
-              Anuluj
+              {{ $t("common.cancel") }}
             </button>
             <button type="button" class="btn btn-danger" @click="confirmDelete">
-              <i class="bi bi-trash me-2"></i>
-              Usuń
+              <i class="bi bi-trash me-2"></i>{{ $t("reviews.deleteBtn") }}
             </button>
           </div>
         </div>
@@ -83,8 +78,7 @@
 
     <div class="d-flex justify-content-between align-items-center mb-4">
       <h1 class="text-primary">
-        <i class="bi bi-card-checklist me-3"></i>
-        Lista zgłoszonych recenzji
+        <i class="bi bi-card-checklist me-3"></i>{{ $t("reviews.list") }}
       </h1>
       <div>
         <button
@@ -92,12 +86,10 @@
           class="btn btn-outline-primary"
           @click="authModal?.show()"
         >
-          <i class="bi bi-shield-lock me-2"></i>
-          Logowanie administratora
+          <i class="bi bi-shield-lock me-2"></i>{{ $t("reviews.admin") }}
         </button>
         <button v-else class="btn btn-outline-danger" @click="logoutAdmin">
-          <i class="bi bi-box-arrow-right me-2"></i>
-          Wyloguj
+          <i class="bi bi-box-arrow-right me-2"></i>{{ $t("reviews.logout") }}
         </button>
       </div>
     </div>
@@ -110,7 +102,7 @@
         <input
           type="text"
           class="form-control"
-          placeholder="Wyszukaj recenzje po autorze lub tytule gry..."
+          :placeholder="$t('reviews.searchPlaceholder')"
           v-model="searchQuery"
         />
       </div>
@@ -129,8 +121,8 @@
                 <h5 class="card-title mb-0">
                   {{ review.nickname }}
                   <span class="fs-6 fw-normal"
-                    >({{ review.hoursPlayed }} godzin gry)</span
-                  >
+                    >{{ review.hoursPlayed }}{{ $t("reviews.hours") }}
+                  </span>
                 </h5>
                 <p class="mb-0 small">{{ review.gameTitle }}</p>
               </div>
@@ -170,13 +162,14 @@
                   class="btn btn-sm btn-outline-secondary"
                   @click="cancelEdit"
                 >
-                  <i class="bi bi-x-circle me-2"></i>Anuluj
+                  <i class="bi bi-x-circle me-2"></i>{{ $t("common.cancel") }}
                 </button>
                 <button
                   class="btn btn-sm btn-primary"
                   @click="saveChanges(index)"
                 >
-                  <i class="bi bi-check-circle me-2"></i>Zapisz zmiany
+                  <i class="bi bi-check-circle me-2"></i
+                  >{{ $t("reviews.save") }}
                 </button>
               </div>
             </div>
@@ -185,10 +178,10 @@
               <p class="card-text pre-formatted">{{ review.review }}</p>
 
               <div v-if="review.textDocument" class="mt-3">
-                <p class="mb-1 small text-muted">Załączony dokument:</p>
+                <p class="mb-1 small text-muted">{{ $t("reviews.doc") }}</p>
                 <span class="badge bg-info">
                   <i class="bi bi-file-earmark-text me-2"></i>
-                  {{ review.textDocument?.name || "Brak nazwy" }}
+                  {{ review.textDocument?.name || $t("reviews.noName") }}
                   <span class="ms-2"
                     >({{ formatSize(review.textDocument?.size) }})</span
                   >
@@ -196,7 +189,9 @@
               </div>
 
               <div v-if="review.screenshots" class="mt-3">
-                <p class="mb-1 small text-muted">Zrzuty ekranu:</p>
+                <p class="mb-1 small text-muted">
+                  {{ $t("reviews.screenshots") }}
+                </p>
                 <div class="d-flex flex-wrap gap-2">
                   <span
                     v-for="(screenshot, i) in review.screenshots"
@@ -204,7 +199,7 @@
                     class="badge bg-warning text-dark"
                   >
                     <i class="bi bi-image me-2"></i>
-                    {{ screenshot?.name || "Brak nazwy" }} ({{
+                    {{ screenshot?.name || $t("reviews.noName") }} ({{
                       formatSize(screenshot?.size)
                     }})
                   </span>
@@ -212,10 +207,10 @@
               </div>
 
               <div v-if="review.videoReview" class="mt-3">
-                <p class="mb-1 small text-muted">Recenzja wideo:</p>
+                <p class="mb-1 small text-muted">{{ $t("reviews.video") }}</p>
                 <span class="badge bg-danger">
                   <i class="bi bi-film me-2"></i>
-                  {{ review.videoReview?.name || "Brak nazwy" }} ({{
+                  {{ review.videoReview?.name || $t("reviews.noName") }} ({{
                     formatSize(review.videoReview?.size)
                   }})
                 </span>
@@ -224,8 +219,9 @@
           </div>
 
           <div class="card-footer bg-light">
-            <small class="text-muted">
-              Zgłoszono:
+            <small class="text-muted"
+              >{{ $t("reviews.submitted") }}
+
               {{ new Date(review.timestamp).toLocaleDateString("pl-PL") }}
             </small>
           </div>
@@ -237,8 +233,7 @@
       v-if="formStore.submissions.length === 0"
       class="alert alert-info mt-4"
     >
-      <i class="bi bi-info-circle me-2"></i>
-      Brak zgłoszonych recenzji do wyświetlenia
+      <i class="bi bi-info-circle me-2"></i>{{ $t("reviews.noSubmissions") }}
     </div>
 
     <div class="d-flex justify-content-center mt-5" v-if="totalPages > 1">
@@ -250,7 +245,7 @@
               @click="currentPage = currentPage - 1"
               :disabled="currentPage === 1"
             >
-              &laquo; Poprzednia
+              &laquo;{{ $t("reviews.previous") }}
             </button>
           </li>
 
@@ -274,7 +269,7 @@
               @click="currentPage = currentPage + 1"
               :disabled="currentPage === totalPages"
             >
-              Następna &raquo;
+              {{ $t("reviews.next") }} &raquo;
             </button>
           </li>
         </ul>
@@ -290,8 +285,9 @@ import { useFormStore } from "../stores/formDane";
 import { useNotificationsStore } from "@/stores/notifications";
 import { useLoadingStore } from "@/stores/loading";
 import ReviewSubmission from "@/models/IReview";
+import { useI18n } from "vue-i18n";
 
-const formStore = useFormStore<{ submissions: ReviewSubmission[] }>();
+const formStore = useFormStore();
 const adminPasswordInput = ref("");
 const isAdmin = ref(localStorage.getItem("adminSession") === "active");
 const editingIndex = ref(-1);
@@ -302,6 +298,7 @@ const searchQuery = ref("");
 const itemsPerPage = ref(8);
 const currentPage = ref(1);
 const loading = useLoadingStore();
+const { t } = useI18n();
 
 let authModal: Modal | null = null;
 let deleteModal: Modal | null = null;
@@ -331,17 +328,19 @@ const handleAdminAuth = async () => {
     );
     authModal?.hide();
   } catch (error) {
-    notifications.showToast("error", "Nieprawidłowe hasło administratora!");
+    notifications.showToast("error", t("reviews.authFailed"), {
+      title: t("notifications.errorTitle"),
+    });
     adminPasswordInput.value = "";
   }
 };
 
 const logoutAdmin = () => {
   isAdmin.value = false;
+  adminPasswordInput.value = "";
   localStorage.removeItem("adminSession");
   authModal?.hide();
 };
-
 const filteredReviews = computed(() => {
   if (!searchQuery.value) return formStore.submissions;
 
@@ -382,12 +381,15 @@ const saveChanges = async (index: number) => {
         review: editContent.value,
       })
     );
-    notifications.showToast("success", "Zmiany zapisano pomyślnie!");
-
+    notifications.showToast("success", t("notifications.saveSuccess"), {
+      title: t("notifications.successTitle"),
+    });
     editingIndex.value = -1;
     editContent.value = "";
   } catch (error) {
-    notifications.showToast("error", "Błąd podczas zapisywania zmian");
+    notifications.showToast("error", t("notifications.saveError"), {
+      title: t("notifications.errorTitle"),
+    });
   }
 };
 
@@ -410,7 +412,9 @@ const confirmDelete = () => {
   if (reviewToDelete.value !== null) {
     formStore.deleteSubmission(reviewToDelete.value);
     deleteModal?.hide();
-    notifications.showToast("success", "Recenzja została pomyślnie usunięta!");
+    notifications.showToast("success", t("notifications.deleteSuccess"), {
+      title: t("notifications.successTitle"),
+    });
     reviewToDelete.value = null;
   }
 };
@@ -422,8 +426,14 @@ watch(searchQuery, () => {
 onMounted(() => {
   console.info("[Recenzje] Komponent zamontowany");
 
-  authModal = new Modal("#adminAuthModal");
-  deleteModal = new Modal("#deleteConfirmationModal");
+  authModal = new Modal("#adminAuthModal", {
+    focus: true,
+    keyboard: false,
+  });
+
+  deleteModal = new Modal("#deleteConfirmationModal", {
+    focus: true,
+  });
   console.debug("[Recenzje] Zainicjowano modale:", authModal, deleteModal);
 });
 </script>

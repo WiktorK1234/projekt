@@ -2,9 +2,9 @@
   <div class="container my-5">
     <div v-if="photoStore.loading" class="text-center">
       <div class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
+        <span class="visually-hidden">{{ $t("common.loading") }}</span>
       </div>
-      <p class="mt-2">Ładowanie galerii...</p>
+      <p class="mt-2">{{ $t("common.loading") }}</p>
     </div>
 
     <div v-if="photoStore.error" class="alert alert-danger mt-4">
@@ -20,19 +20,19 @@
         class="alert alert-warning mt-4"
       >
         <i class="bi bi-exclamation-triangle me-2"></i>
-        Brak zdjęć do wyświetlenia. Spróbuj odświeżyć stronę.
+        {{ $t("gallery.noPhotos") }}
       </div>
 
       <div class="text-center mb-5">
         <h1 class="display-4 text-primary">
-          Galeria zdjęć od naszych fanów!
+          {{ $t("gallery.title") }}
           <i class="bi bi-heart-fill text-success me-2"></i>
         </h1>
-        <p class="lead">Zobacz zdjęcia wysłane do nas od naszej społeczności</p>
+        <p class="lead">{{ $t("gallery.subtitle") }}</p>
       </div>
 
       <div class="mb-5">
-        <h2 class="text-primary mb-4">🎮 Gry wideo/konsole</h2>
+        <h2 class="text-primary mb-4">{{ $t("gallery.gamesSection") }}</h2>
         <div class="row g-4" data-testid="games-section">
           <div
             v-for="photo in photoStore.gamesPhotos"
@@ -51,7 +51,7 @@
       </div>
 
       <div class="mb-5">
-        <h2 class="text-primary mb-4">👾 Postacie z gier</h2>
+        <h2 class="text-primary mb-4">{{ $t("gallery.charactersSection") }}</h2>
         <div class="row g-4" data-testid="characters-section">
           <div
             v-for="photo in photoStore.charactersPhotos"

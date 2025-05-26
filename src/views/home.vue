@@ -11,91 +11,74 @@
 
     <div class="alert alert-info mt-4 d-inline-block">
       <i class="bi bi-eye me-2"></i>
-      Liczba unikalnych odwiedzin:
+      {{ $t("home.visits") }}
       <strong>{{ visitCounter.visitCount }}</strong>
     </div>
 
     <div class="card mb-4 shadow-sm">
       <div class="card-body">
-        <h2 class="card-title text-info">Witamy w GameZone</h2>
-        <p class="card-text">
-          GameZone to miejsce stworzone z myślą o wszystkich miłośnikach gier —
-          od fanów klasycznych gier planszowych po zapalonych graczy konsolowych
-          i PC. Znajdziesz u nas zarówno gry w wersji fizycznej, jak i cyfrowej,
-          gotowe do pobrania od razu po zakupie.
-        </p>
+        <h2 class="card-title text-info">{{ $t("home.welcomeTitle") }}</h2>
+        <p class="card-text">{{ $t("home.welcomeText") }}</p>
       </div>
     </div>
 
     <div class="card mb-4 shadow-sm">
       <div class="card-body">
-        <h2 class="card-title text-info">Dlaczego warto kupować u nas?</h2>
-        <p class="card-text">
-          W GameZone stawiamy na jakość, wygodę i szeroki wybór. Oferujemy gry
-          na najpopularniejsze platformy oraz unikalne edycje kolekcjonerskie.
-        </p>
+        <h2 class="card-title text-info">{{ $t("home.title1") }}</h2>
+        <p class="card-text">{{ $t("home.text1") }}</p>
         <ul class="list-group list-group-flush mb-3">
           <li class="list-group-item text-break">
             <i class="bi bi-controller text-success me-2"></i>
-            Gry cyfrowe i fizyczne w jednym miejscu
+            {{ $t("home.bullet1") }}
           </li>
           <li class="list-group-item text-break">
-            <i class="bi bi-truck text-success me-2"></i>
-            Szybka i bezpieczna dostawa produktów fizycznych
+            <i class="bi bi-truck text-success me-2"></i
+            >{{ $t("home.bullet2") }}
           </li>
           <li class="list-group-item text-break">
-            <i class="bi bi-cloud-download text-success me-2"></i>
-            Natychmiastowy dostęp do gier cyfrowych
+            <i class="bi bi-cloud-download text-success me-2"></i
+            >{{ $t("home.bullet3") }}
           </li>
           <li class="list-group-item text-break">
-            <i class="bi bi-star-fill text-success me-2"></i>
-            Tylko sprawdzone i wysoko oceniane tytuły
+            <i class="bi bi-star-fill text-success me-2"></i
+            >{{ $t("home.bullet4") }}
           </li>
           <li class="list-group-item text-break">
-            <i class="bi bi-tags-fill text-success me-2"></i>
-            Regularne promocje i oferty specjalne
+            <i class="bi bi-tags-fill text-success me-2"></i
+            >{{ $t("home.bullet5") }}
           </li>
           <li class="list-group-item text-break">
-            <i class="bi bi-headset text-success me-2"></i>
-            Pomoc techniczna i wsparcie klienta 7 dni w tygodniu
+            <i class="bi bi-headset text-success me-2"></i
+            >{{ $t("home.bullet6") }}
           </li>
         </ul>
-        <p class="card-text">
-          Dołącz do setek zadowolonych graczy i przekonaj się, że zakupy z
-          GameZone to czysta przyjemność!
-        </p>
+        <p class="card-text">{{ $t("home.last1") }}</p>
       </div>
     </div>
 
     <div class="card mb-4 shadow-sm">
       <div class="card-body">
-        <h2 class="card-title text-info">Nasze atuty</h2>
-        <p class="card-text">
-          Tworzymy sklep z pasji do grania. Wspieramy zarówno największe
-          wydawnictwa, jak i niezależnych twórców.
-        </p>
+        <h2 class="card-title text-info">{{ $t("home.title2") }}</h2>
+        <p class="card-text">{{ $t("home.text2") }}</p>
         <ul class="list-group list-group-flush mb-3">
           <li class="list-group-item text-break">
-            <i class="bi bi-award text-success me-2"></i>
-            Bogata biblioteka gier na różne platformy
+            <i class="bi bi-award text-success me-2"></i
+            >{{ $t("home.bullet7") }}
           </li>
           <li class="list-group-item text-break">
-            <i class="bi bi-award text-success me-2"></i>
-            Atrakcyjne ceny i program lojalnościowy
+            <i class="bi bi-award text-success me-2"></i
+            >{{ $t("home.bullet8") }}
           </li>
           <li class="list-group-item text-break">
-            <i class="bi bi-award text-success me-2"></i>
-            Intuicyjny interfejs i łatwość zakupów
+            <i class="bi bi-award text-success me-2"></i
+            >{{ $t("home.bullet9") }}
           </li>
           <li class="list-group-item text-break">
-            <i class="bi bi-award text-success me-2"></i>
-            Społeczność graczy dzieląca się recenzjami i opiniami
+            <i class="bi bi-award text-success me-2"></i
+            >{{ $t("home.bullet10") }}
           </li>
         </ul>
-        <p class="card-text">
-          Zajrzyj do naszej galerii, poznaj szczegóły gier i skorzystaj z
-          formularza, aby się z nami skontaktować. Granie zaczyna się tutaj!
-        </p>
+        <p class="card-text">{{ $t("home.last2") }}</p>
       </div>
     </div>
   </div>

@@ -4,32 +4,30 @@
       <div class="card-body text-center">
         <h1 class="card-title text-primary">
           <i class="bi bi-controller me-2"></i>
-          Zgłoś swoją recenzję gry!
+          {{ $t("form.title") }}
         </h1>
       </div>
     </div>
 
     <div class="card shadow-sm mb-4">
       <div class="card-body">
-        <p class="lead">
-          Podziel się swoją opinią o najnowszych tytułach! Najlepsze recenzje
-          zostaną opublikowane na naszym portalu i nagrodzone zestawami
-          gamingowymi.
-        </p>
+        <p class="lead">{{ $t("form.description") }}</p>
       </div>
     </div>
 
-    <h2 class="text-primary mb-4">Formularz recenzji</h2>
-    <form @submit.prevent="onSubmit" :key="formKey">
+    <h2 class="text-primary mb-4">{{ $t("form.formTitle") }}</h2>
+    <form @submit.prevent="onSubmit" :key="`${formKey}_${locale}`">
       <div class="mb-3">
-        <label for="gameTitle" class="form-label">Tytuł gry</label>
+        <label for="gameTitle" class="form-label">{{
+          $t("form.gameTitle")
+        }}</label>
         <div class="input-group">
           <Field
             name="gameTitle"
             type="text"
             class="form-control"
             list="gameSuggestions"
-            placeholder="Wpisz lub wybierz tytuł gry..."
+            :placeholder="$t('form.gameTitlePlaceholder')"
             rules="required"
           />
         </div>
@@ -41,14 +39,14 @@
 
       <div class="mb-3">
         <label for="nickname" class="form-label">
-          Twój gamingowy nick
-          <span class="text-muted small">(wymagane)</span>
+          {{ $t("form.nickname") }}
+          <span class="text-muted small">{{ $t("form.required") }}</span>
         </label>
         <Field
           type="text"
           class="form-control"
           name="nickname"
-          placeholder="Podaj swój pseudonim..."
+          :placeholder="$t('form.nicknamePlaceholder')"
           rules="required|min:3"
         />
         <ErrorMessage name="nickname" class="text-danger small d-block mt-1" />
@@ -56,8 +54,8 @@
 
       <div class="mb-3">
         <label for="hoursPlayed" class="form-label">
-          Liczba godzin rozgrywki
-          <span class="text-muted small">(wymagane)</span>
+          {{ $t("form.hoursPlayed") }}
+          <span class="text-muted small">{{ $t("form.required") }}</span>
         </label>
         <Field
           type="number"
@@ -65,7 +63,7 @@
           name="hoursPlayed"
           min="1"
           max="10000"
-          placeholder="Podaj liczbę godzin..."
+          :placeholder="$t('form.hoursPlaceholder')"
         />
         <ErrorMessage
           name="hoursPlayed"
@@ -75,74 +73,94 @@
 
       <div class="mb-3">
         <label for="review" class="form-label">
-          Recenzja
-          <span class="text-muted small" v-if="hasTextDocument"
-            >(opcjonalne)</span
-          >
-          <span class="text-muted small" v-else
-            >(wymagane, min. 500 znaków)</span
-          >
+          {{ $t("form.review") }}
+          <span class="text-muted small" v-if="hasTextDocument">{{
+            $t("form.optional")
+          }}</span>
+          <span class="text-muted small" v-else>{{
+            $t("form.reviewRequirements")
+          }}</span>
         </label>
         <Field
           as="textarea"
           class="form-control"
           name="review"
           rows="5"
-          placeholder="Opisz swoje doświadczenia z grą..."
+          :placeholder="$t('form.reviewPlaceholder')"
         />
         <ErrorMessage name="review" class="text-danger small d-block mt-1" />
       </div>
 
       <div class="mb-3">
         <label for="textDocument" class="form-label">
-          Załącznik tekstowy (opcjonalny, .doc/.docx/.pdf, max 5MB)
+          {{ $t("form.textDocument") }}
         </label>
         <Field
           type="file"
           class="form-control"
           name="textDocument"
+          :key="'doc_' + locale"
           accept=".doc,.docx,.pdf"
-          @change="(e) => handleFileUpload(e, 'textDocument')"
+          @change="handleFileChange"
         />
         <ErrorMessage
           name="textDocument"
           class="text-danger small d-block mt-1"
         />
+        <div class="small text-muted mt-1">
+          {{ values.textDocument?.name || $t("form.noFileChosen") }}
+        </div>
       </div>
 
       <div class="mb-3">
-        <label for="screenshots" class="form-label"
-          >Zrzuty ekranu (opcjonalne, max 5MB, JPG/PNG/MP4)</label
-        >
+        <label for="screenshots" class="form-label">
+          {{ $t("form.screenshots") }}
+        </label>
         <Field
           type="file"
           class="form-control"
           name="screenshots"
-          accept="image/*, video/*"
+          :key="'screenshots_' + locale"
+          accept="image/*"
           multiple
-          @change="(e) => handleFileUpload(e, 'screenshots')"
+          @change="(e) => handleFileChange(e, 'screenshots')"
         />
         <ErrorMessage
           name="screenshots"
           class="text-danger small d-block mt-1"
         />
+        <div class="small text-muted mt-1">
+          {{
+            values.screenshots?.length > 0
+              ? $t("form.chooseFile", { count: values.screenshots.length })
+              : $t("form.noFileChosen")
+          }}
+        </div>
       </div>
 
       <div class="mb-4">
-        <label for="videoReview" class="form-label"
-          >Recenzja wideo (opcjonalna, max 100MB, MP4/AVI)</label
-        >
+        <label for="videoReview" class="form-label">
+          {{ $t("form.videoReview") }}
+        </label>
         <Field
           type="file"
           class="form-control"
           name="videoReview"
+          :key="'video_' + locale"
           accept="video/*"
-          @change="(e) => handleFileUpload(e, 'videoReview')"
+          @change="(e) => handleFileChange(e, 'videoReview')"
         />
         <ErrorMessage
           name="videoReview"
           class="text-danger small d-block mt-1"
         />
+        <div class="small text-muted mt-1">
+          {{
+            values.videoReview
+              ? $t("form.fileChosen", { name: values.videoReview.name })
+              : $t("form.noFileChosen")
+          }}
+        </div>
       </div>
 
       <div class="d-grid gap-2 d-md-flex justify-content-md-end mb-4">
@@ -151,7 +169,8 @@
           class="btn btn-outline-secondary me-md-2"
           @click="cancel"
         >
-          <i class="bi bi-x-circle me-2"></i> Anuluj
+          <i class="bi bi-x-circle me-2"></i>
+          {{ $t("common.cancel") }}
         </button>
         <button
           type="submit"
@@ -159,7 +178,7 @@
           :disabled="!meta.valid || isSubmitting"
         >
           <i class="bi bi-send-fill me-2"></i>
-          {{ isSubmitting ? "Wysyłanie..." : "Opublikuj recenzję" }}
+          {{ isSubmitting ? $t("form.submitting") : $t("form.submit") }}
         </button>
       </div>
     </form>
@@ -174,6 +193,7 @@ import { useFormStore } from "../stores/formDane";
 import { useNotificationsStore } from "@/stores/notifications";
 import { useLoadingStore } from "@/stores/loading";
 import ReviewSubmission from "@/models/IReview";
+import { useI18n } from "vue-i18n";
 
 const formStore = useFormStore();
 
@@ -190,74 +210,82 @@ const isSubmitting = ref(false);
 const notifications = useNotificationsStore();
 const hasTextDocument = computed(() => !!textDocumentFile.value);
 const formKey = ref(0);
+const { t, locale } = useI18n();
 
-const schema = yup.object({
-  gameTitle: yup.string().required("Podaj tytuł gry"),
-  nickname: yup
-    .string()
-    .required("Podaj swój nick")
-    .min(3, "Minimum 3 znaki")
-    .matches(
-      /^[a-zA-Z0-9_]+$/,
-      "Dozwolone znaki: litery, cyfry i podkreślenia"
-    ),
-  hoursPlayed: yup
-    .number()
-    .typeError("Podaj poprawną liczbę godzin")
-    .min(1, "Minimum 1 godzina rozgrywki")
-    .max(10000, "Maksymalnie 10,000 godzin")
-    .required("Pole wymagane"),
-  review: yup.string().when("textDocument", {
-    is: (file: File) => !file,
-    then: () =>
-      yup
-        .string()
-        .required("Recenzja jest wymagana")
-        .min(500, "Minimum 500 znaków"),
-    otherwise: () => yup.string(),
-  }),
-  textDocument: yup
-    .mixed()
-    .test("fileSize", "Maksymalny rozmiar pliku: 5MB", (value) => {
-      if (!value) return true;
-      return value.size <= 5 * 1024 * 1024;
-    })
-    .test("fileType", "Dopuszczalne formaty: DOC, DOCX, PDF", (value) => {
-      if (!value) return true;
-      return [
-        "application/pdf",
-        "application/msword",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-      ].includes(value.type);
+const validationSchema = computed(() =>
+  yup.object({
+    gameTitle: yup.string().required(t("form.validation.gameTitleRequired")),
+    nickname: yup
+      .string()
+      .required(t("form.nicknameRequired"))
+      .min(3, t("form.nicknameMin"))
+      .matches(/^[a-zA-Z0-9_]+$/, t("form.nicknamePattern")),
+    hoursPlayed: yup
+      .number()
+      .typeError(t("form.hoursTypeError"))
+      .min(1, t("form.hoursMin"))
+      .max(10000, t("form.hoursMax"))
+      .required(t("form.required")),
+    review: yup.string().when("textDocument", {
+      is: (file: File) => !file,
+      then: (schema) =>
+        schema.required(t("form.reviewRequired")).min(500, t("form.reviewMin")),
+      otherwise: (schema) => schema,
     }),
-  screenshots: yup
-    .mixed()
-    .test("fileSize", "Maksymalny rozmiar pliku: 5MB", (value) => {
-      if (!value) return true;
-      return Array.from(value as File[]).every(
-        (file) => file.size <= 5 * 1024 * 1024
-      );
-    })
-    .test("fileType", "Dopuszczalne formaty: JPG, PNG, MP4", (value) => {
-      if (!value) return true;
-      return Array.from(value as File[]).every((file) =>
-        ["image/jpeg", "image/png", "video/mp4"].includes(file.type)
-      );
-    }),
-  videoReview: yup
-    .mixed()
-    .test("fileSize", "Maksymalny rozmiar pliku: 100MB", (value) => {
-      if (!value) return true;
-      return (value as File).size <= 100 * 1024 * 1024;
-    })
-    .test("fileType", "Dopuszczalne formaty: MP4, AVI", (value) => {
-      if (!value) return true;
-      return ["video/mp4", "video/x-msvideo"].includes((value as File).type);
-    }),
-});
+    textDocument: yup
+      .mixed()
+      .test(
+        "fileSize",
+        t("form.fileSize"),
+        (value) => !value || value.size <= 5 * 1024 * 1024
+      )
+      .test(
+        "fileType",
+        t("form.fileTypeDocs"),
+        (value) =>
+          !value ||
+          [
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          ].includes(value.type)
+      ),
+    screenshots: yup
+      .mixed()
+      .test(
+        "fileSize",
+        t("form.fileSize"),
+        (value) =>
+          !value ||
+          Array.from(value).every((file: File) => file.size <= 5 * 1024 * 1024)
+      )
+      .test(
+        "fileType",
+        t("form.fileTypeImages"),
+        (value) =>
+          !value ||
+          Array.from(value).every((file: File) =>
+            ["image/jpeg", "image/png"].includes(file.type)
+          )
+      ),
+    videoReview: yup
+      .mixed()
+      .test(
+        "fileSize",
+        t("form.videoFileSize"),
+        (value) => !value || value.size <= 100 * 1024 * 1024
+      )
+      .test(
+        "fileType",
+        t("form.fileTypeVideo"),
+        (value) =>
+          !value || ["video/mp4", "video/x-msvideo"].includes(value.type)
+      ),
+  })
+);
 
-const { handleSubmit, resetForm, meta, setFieldValue } = useForm({
-  validationSchema: schema,
+const { handleSubmit, resetForm, meta, setFieldValue, values } = useForm({
+  validationSchema: validationSchema.value,
 });
 
 const handleFileUpload = (event: Event, fieldName: string) => {
@@ -269,7 +297,6 @@ const handleFileUpload = (event: Event, fieldName: string) => {
   }
 };
 
-// views/formularz.vue
 const onSubmit = handleSubmit(async (values) => {
   const loading = useLoadingStore();
   isSubmitting.value = true;
@@ -287,8 +314,7 @@ const onSubmit = handleSubmit(async (values) => {
       screenshots: values.screenshots,
       videoReview: values.videoReview,
     };
-
-    formStore.addSubmission(submissionData);
+    await formStore.addSubmission(submissionData);
 
     await new Promise((resolve) => setTimeout(resolve, 2000));
     resetForm();
@@ -299,18 +325,14 @@ const onSubmit = handleSubmit(async (values) => {
     textDocumentFile.value = null;
 
     formKey.value++;
-    notifications.showToast("success", "Recenzja została pomyślnie wysłana!", {
-      title: "Sukces!",
-      timeout: 4000,
+    notifications.showToast("success", t("notifications.submitSuccess"), {
+      title: t("notifications.successTitle"),
     });
   } catch (error) {
-    notifications.showToast(
-      "error",
-      "Wystąpił błąd podczas wysyłania recenzji.",
-      {
-        title: "Błąd!",
-      }
-    );
+    console.error(error);
+    notifications.showToast("error", t("notifications.submitError"), {
+      title: t("notifications.errorTitle"),
+    });
   } finally {
     loading.stop();
     isSubmitting.value = false;
@@ -321,6 +343,28 @@ const cancel = () => {
   resetForm();
   textDocumentFile.value = null;
 };
+
+const handleFileChange = (event: Event, field: string) => {
+  const input = event.target as HTMLInputElement;
+  const files = input.files;
+
+  if (files) {
+    setFieldValue(field, input.multiple ? Array.from(files) : files[0]);
+  }
+};
+
+watch(locale, () => {
+  setFieldValue("textDocument", null);
+  setFieldValue("screenshots", null);
+  setFieldValue("videoReview", null);
+
+  const fileInputs = document.querySelectorAll('input[type="file"]');
+  fileInputs.forEach((input: HTMLInputElement) => {
+    input.value = "";
+  });
+
+  formKey.value++;
+});
 </script>
 
 <style scoped>
