@@ -1,20 +1,20 @@
 import { defineStore } from "pinia";
-import type Toast from "@/models/IToast";
+import type IToast from "@/models/IToast";
 
 export type ToastType = "success" | "error" | "warning" | "info";
 
 export const useNotificationsStore = defineStore("notifications", {
   state: () => ({
-    toasts: [] as Toast[],
+    toasts: [] as IToast[],
   }),
 
   actions: {
     showToast(
-      type: Toast["type"],
+      type: IToast["type"],
       message: string,
       config?: { title?: string; timeout?: number }
     ) {
-      const toast: Toast = {
+      const toast: IToast = {
         id: Symbol(),
         type,
         message,

@@ -177,8 +177,8 @@
 <script setup lang="ts">
 import { ref, watch, nextTick, onMounted, onBeforeUnmount } from "vue";
 import { Collapse, Toast } from "bootstrap";
-import { useNotificationsStore } from "@/stores/notyfikacje";
-import type { ToastType } from "@/stores/notyfikacje";
+import { useNotificationsStore } from "@/stores/notifications";
+import type { ToastType } from "@/stores/notifications";
 import { useLoadingStore } from "@/stores/loading";
 
 const notifications = useNotificationsStore();
@@ -197,8 +197,6 @@ onMounted(() => {
 
 const toggleNavbar = () => {
   if (!navbarCollapse) return;
-
-  // Tylko rozwija menu jeśli jest zwinięte
   if (!navbarCollapseRef.value?.classList.contains("show")) {
     navbarCollapse.show();
   }

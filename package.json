@@ -6,7 +6,9 @@
   "scripts": {
     "dev": "vite",
     "build": "vue-tsc -b && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:unit": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@popperjs/core": "^2.11.8",
@@ -21,13 +23,21 @@
     "yup": "^1.6.1"
   },
   "devDependencies": {
+    "@testing-library/user-event": "^14.6.1",
+    "@testing-library/vue": "^8.1.0",
     "@tsconfig/node18": "^18.2.4",
+    "@types/testing-library__vue": "^5.0.0",
     "@vitejs/plugin-vue": "^5.2.3",
+    "@vitest/coverage-istanbul": "^3.1.4",
     "@vue/runtime-core": "^3.5.14",
+    "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.7.0",
+    "happy-dom": "^17.4.7",
+    "jsdom": "^26.1.0",
     "sass": "^1.89.0",
     "typescript": "~5.8.3",
     "vite": "^6.3.5",
+    "vitest": "^3.1.4",
     "vue-tsc": "^2.2.8"
   }
 }

@@ -171,7 +171,7 @@ import { ref, computed, watch } from "vue";
 import { useForm, Field, ErrorMessage } from "vee-validate";
 import * as yup from "yup";
 import { useFormStore } from "../stores/formDane";
-import { useNotificationsStore } from "@/stores/notyfikacje";
+import { useNotificationsStore } from "@/stores/notifications";
 import { useLoadingStore } from "@/stores/loading";
 import ReviewSubmission from "@/models/IReview";
 

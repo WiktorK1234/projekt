@@ -78,7 +78,7 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { usePhotoStore } from "../stores/photos";
 import { useLoadingStore } from "@/stores/loading";
-import { useNotificationsStore } from "@/stores/notyfikacje";
+import { useNotificationsStore } from "@/stores/notifications";
 import type IPhoto from "@/models/IPhoto";
 
 const route = useRoute();

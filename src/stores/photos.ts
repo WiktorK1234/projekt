@@ -1,93 +1,64 @@
 import { defineStore } from "pinia";
 import { searchImages } from "@/api/pixabayAPI";
-import { IPhoto } from "@/models/IPhoto";
-import { useLoadingStore } from "@/stores/loading";
+import type { IPhoto } from "@/models/IPhoto";
+import { useLoadingStore } from "./loading";
+
+interface PhotoState {
+  allPhotos: IPhoto[];
+  loading: boolean;
+  error: string | null;
+  lastFetch: number | null;
+}
 
 export const usePhotoStore = defineStore("photos", {
-  state: () => ({
-    allPhotos: [] as IPhoto[],
+  state: (): PhotoState => ({
+    allPhotos: [],
     loading: false,
-    error: null as string | null,
-    lastFetch: null as number | null,
+    error: null,
+    lastFetch: null,
   }),
 
   actions: {
     async fetchPhotos() {
-      const loading = useLoadingStore();
+      const loadingStore = useLoadingStore();
       try {
-        loading.start();
+        this.loading = true;
+        loadingStore.start();
 
         if (!this.lastFetch || Date.now() - this.lastFetch > 3600000) {
           const [games, characters] = await Promise.all([
             this.fetchCategory("video games", "games", 20),
-            this.fetchCategory("video-game-character", "characters", 40),
+            this.fetchCategory("game character", "characters", 20),
           ]);
 
           this.allPhotos = [...games, ...characters];
           this.lastFetch = Date.now();
           this.saveToLocalStorage();
-
-          console.log(
-            "[Photos] Zaktualizowano zdjęcia:",
-            this.allPhotos.length
-          );
         }
-      } catch (err) {
-        this.error =
-          "Błąd pobierania zdjęć. Odśwież stronę lub spróbuj później.";
-        console.error(err);
+      } catch (error) {
+        this.error = "Błąd pobierania zdjęć. Spróbuj ponownie później.";
+        console.error("Store error:", error);
       } finally {
-        loading.stop();
+        this.loading = false;
+        loadingStore.stop();
       }
     },
 
     async fetchCategory(
       query: string,
-      category: "games" | "characters",
+      category: IPhoto["category"],
       count: number
     ): Promise<IPhoto[]> {
       try {
-        const response = await searchImages(query, count);
-        
-        return response.data.hits.map((img: any, index: number) => ({
-          id: img.id + Date.now() + index, // Unikalne ID
-          url: img.webformatURL || img.largeImageURL,
-          user: img.user || "Anonymous",
-          imageHeight: img.webformatHeight,
-          imageWidth: img.webformatWidth,
-          category: category
-        } as IPhoto));
-        
+        const photos = await searchImages(query, category, count);
+        return photos.map((photo) => ({
+          ...photo,
+          category: photo.category || category,
+        }));
       } catch (error) {
-        console.error(`Błąd pobierania ${category}:`, error);
+        console.error(`Error fetching ${category}:`, error);
         return [];
       }
-    }
-
-    filterCharacters(photos: IPhoto[]) {
-      return photos.filter((p) => p.category === "characters");
-    },
-
-    getPhotoById(id: number): IPhoto | undefined {
-      return this.allPhotos.find((photo) => photo.id === id);
-    },
-
-    addPhoto(newPhoto: IPhoto) {
-      this.allPhotos.unshift(newPhoto);
-      this.saveToLocalStorage();
-    },
-
-    updatePhoto(updatedPhoto: IPhoto) {
-      const index = this.allPhotos.findIndex((p) => p.id === updatedPhoto.id);
-      if (index !== -1) {
-        this.allPhotos.splice(index, 1, updatedPhoto);
-        this.saveToLocalStorage();
-      }
-    },
-
-    deletePhoto(photoId: number) {
-      this.allPhotos = this.allPhotos.filter((p) => p.id !== photoId);
-      this.saveToLocalStorage();
     },
 
     saveToLocalStorage() {
@@ -99,17 +70,17 @@ export const usePhotoStore = defineStore("photos", {
       if (cached) {
         try {
           const parsed = JSON.parse(cached);
-          this.allPhotos = parsed.filter(
-            (photo: IPhoto) =>
-              photo?.url?.startsWith("https://") &&
-              (photo.category === "characters"
-                ? !photo.url.toLowerCase().includes("chess")
-                : true)
+          this.allPhotos = parsed.filter((photo: IPhoto) =>
+            photo?.url?.startsWith("https://")
           );
         } catch (error) {
-          console.error("Błąd parsowania cache:", error);
+          console.error("Error parsing cache:", error);
         }
       }
+    },
+
+    getPhotoById(id: number): IPhoto | undefined {
+      return this.allPhotos.find((photo) => photo.id === id);
     },
   },
 

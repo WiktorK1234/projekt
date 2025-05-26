@@ -1,10 +1,9 @@
 <template>
   <div
     class="card h-100 shadow-sm position-relative"
+    data-testid="image-card"
     @mouseover="isHovered = true"
     @mouseleave="isHovered = false"
-    :class="{ 'shadow-lg': isHovered }"
-    style="cursor: pointer; transition: all 0.2s ease"
   >
     <div class="ratio ratio-1x1">
       <img
@@ -23,9 +22,9 @@
           <div class="w-100 text-center mb-3">
             <slot name="actions">
               <button
+                data-testid="details-button"
                 class="btn btn-light btn-sm rounded-pill px-3"
                 @click.stop="handleClick"
-                :disabled="localLoading"
               >
                 <template v-if="!localLoading">
                   <i class="bi bi-zoom-in me-2"></i>

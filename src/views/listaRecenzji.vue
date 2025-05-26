@@ -287,7 +287,7 @@
 import { ref, onMounted, computed, watch } from "vue";
 import { Modal } from "bootstrap";
 import { useFormStore } from "../stores/formDane";
-import { useNotificationsStore } from "@/stores/notyfikacje";
+import { useNotificationsStore } from "@/stores/notifications";
 import { useLoadingStore } from "@/stores/loading";
 import ReviewSubmission from "@/models/IReview";
 
@@ -410,6 +410,7 @@ const confirmDelete = () => {
   if (reviewToDelete.value !== null) {
     formStore.deleteSubmission(reviewToDelete.value);
     deleteModal?.hide();
+    notifications.showToast("success", "Recenzja została pomyślnie usunięta!");
     reviewToDelete.value = null;
   }
 };
