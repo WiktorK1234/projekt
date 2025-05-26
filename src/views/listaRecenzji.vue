@@ -289,8 +289,9 @@ import { Modal } from "bootstrap";
 import { useFormStore } from "../stores/formDane";
 import { useNotificationsStore } from "@/stores/notyfikacje";
 import { useLoadingStore } from "@/stores/loading";
+import ReviewSubmission from "@/models/IReview";
 
-const formStore = useFormStore();
+const formStore = useFormStore<{ submissions: ReviewSubmission[] }>();
 const adminPasswordInput = ref("");
 const isAdmin = ref(localStorage.getItem("adminSession") === "active");
 const editingIndex = ref(-1);

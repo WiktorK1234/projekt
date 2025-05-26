@@ -79,6 +79,7 @@ import { useRoute, useRouter } from "vue-router";
 import { usePhotoStore } from "../stores/photos";
 import { useLoadingStore } from "@/stores/loading";
 import { useNotificationsStore } from "@/stores/notyfikacje";
+import type IPhoto from "@/models/IPhoto";
 
 const route = useRoute();
 const router = useRouter();
@@ -87,7 +88,7 @@ const error = ref<string | null>(null);
 const loading = useLoadingStore();
 const notifications = useNotificationsStore();
 
-const photo = computed(() => {
+const photo = computed<IPhoto | null>(() => {
   const id = Number(route.params.id);
 
   if (isNaN(id)) {

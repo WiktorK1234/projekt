@@ -173,6 +173,7 @@ import * as yup from "yup";
 import { useFormStore } from "../stores/formDane";
 import { useNotificationsStore } from "@/stores/notyfikacje";
 import { useLoadingStore } from "@/stores/loading";
+import ReviewSubmission from "@/models/IReview";
 
 const formStore = useFormStore();
 
@@ -268,12 +269,15 @@ const handleFileUpload = (event: Event, fieldName: string) => {
   }
 };
 
+// views/formularz.vue
 const onSubmit = handleSubmit(async (values) => {
   const loading = useLoadingStore();
   isSubmitting.value = true;
+
   try {
     loading.start();
-    const submissionData = {
+
+    const submissionData: ReviewSubmission = {
       gameTitle: values.gameTitle,
       nickname: values.nickname,
       hoursPlayed: Number(values.hoursPlayed),

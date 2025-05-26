@@ -45,26 +45,31 @@ export const usePhotoStore = defineStore("photos", {
       query: string,
       category: "games" | "characters",
       count: number
-    ) {
+    ): Promise<IPhoto[]> {
       try {
-        const photos = await searchImages(query, category, count);
-        return photos.map((p) => ({
-          ...p,
-          user: p.user || "Anonymous",
-          url: p.url?.trim() || "",
-        }));
+        const response = await searchImages(query, count);
+        
+        return response.data.hits.map((img: any, index: number) => ({
+          id: img.id + Date.now() + index, // Unikalne ID
+          url: img.webformatURL || img.largeImageURL,
+          user: img.user || "Anonymous",
+          imageHeight: img.webformatHeight,
+          imageWidth: img.webformatWidth,
+          category: category
+        } as IPhoto));
+        
       } catch (error) {
         console.error(`Błąd pobierania ${category}:`, error);
         return [];
       }
-    },
+    }
 
     filterCharacters(photos: IPhoto[]) {
       return photos.filter((p) => p.category === "characters");
     },
 
-    getPhotoById(id: number) {
-      return this.allPhotos.find((photo) => photo.id === id) || null;
+    getPhotoById(id: number): IPhoto | undefined {
+      return this.allPhotos.find((photo) => photo.id === id);
     },
 
     addPhoto(newPhoto: IPhoto) {

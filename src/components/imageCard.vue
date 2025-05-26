@@ -50,25 +50,20 @@
 
 <script setup lang="ts">
 import { ref } from "vue";
-import { useLoadingStore } from "@/stores/loading";
+import type IPhoto from "@/models/IPhoto";
 
 const isHovered = ref(false);
-const loading = useLoadingStore();
 const localLoading = ref(false);
 
-const props = defineProps({
-  id: { type: String, required: true },
-  author: { type: String, required: true },
-  url: {
-    type: String,
-    required: true,
-    validator: (value: string) => {
-      return !!value && (value.startsWith("http") || value.startsWith("/"));
-    },
-  },
-});
+const props = defineProps<{
+  id: string;
+  author: string;
+  url: IPhoto["url"];
+}>();
 
-const emit = defineEmits(["select"]);
+const emit = defineEmits<{
+  (e: "select", id: string): void;
+}>();
 
 const handleClick = async () => {
   localLoading.value = true;
@@ -84,8 +79,6 @@ const handleClick = async () => {
     localLoading.value = false;
   }
 };
-
-const isLoading = ref(true);
 </script>
 
 <style>

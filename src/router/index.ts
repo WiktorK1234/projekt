@@ -49,7 +49,7 @@ const router = createRouter({
 });
 
 router.afterEach((to) => {
-  if (__LOG_ENABLED__) {
+  if (LOGGER) {
     console.info(`[Router] Przejście do: ${to.path}`);
   }
 });

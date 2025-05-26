@@ -11,6 +11,6 @@ export default defineConfig({
     },
   },
   define: {
-    __LOG_ENABLED__: JSON.stringify(process.env.NODE_ENV !== "production"),
+    LOGGER: JSON.stringify(process.env.NODE_ENV !== "production"),
   },
 });

@@ -1,15 +1,5 @@
 import { defineStore } from "pinia";
-
-interface FormSubmission {
-  nickname: string;
-  gameTitle: string;
-  hoursPlayed: number;
-  review: string;
-  textDocument?: File;
-  screenshots?: File[];
-  videoReview?: File;
-  timestamp: number;
-}
+import type ReviewSubmission from "@/models/IReview";
 
 const replacer = (key: string, value: any) => {
   if (value instanceof File) {
@@ -56,12 +46,12 @@ export const useFormStore = defineStore("formData", {
     submissions: JSON.parse(
       localStorage.getItem("submissions") || "[]",
       reviver
-    ) as FormSubmission[],
+    ) as ReviewSubmission[],
   }),
 
   actions: {
-    addSubmission(payload: FormSubmission) {
-      if (__LOG_ENABLED__) {
+    addSubmission(payload: ReviewSubmission) {
+      if (LOGGER) {
         console.debug("[Store] Dodano nową recenzję:", {
           user: payload.nickname,
           game: payload.gameTitle,
@@ -73,7 +63,7 @@ export const useFormStore = defineStore("formData", {
       this.saveToLocalStorage();
     },
 
-    updateSubmission(index: number, payload: FormSubmission) {
+    updateSubmission(index: number, payload: ReviewSubmission) {
       this.submissions[index] = payload;
       this.saveToLocalStorage();
     },
