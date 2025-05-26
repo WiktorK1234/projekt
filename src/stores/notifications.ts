@@ -1,7 +1,17 @@
 import { defineStore } from "pinia";
-import type IToast from "@/models/IToast";
+import { Toast } from "bootstrap";
+import { nextTick } from "vue";
 
 export type ToastType = "success" | "error" | "warning" | "info";
+
+export interface IToast {
+  id: symbol;
+  type: ToastType;
+  message: string;
+  title?: string;
+  timeout?: number;
+  element?: HTMLElement;
+}
 
 export const useNotificationsStore = defineStore("notifications", {
   state: () => ({
@@ -10,12 +20,12 @@ export const useNotificationsStore = defineStore("notifications", {
 
   actions: {
     showToast(
-      type: IToast["type"],
+      type: ToastType,
       message: string,
       config?: { title?: string; timeout?: number }
     ) {
       const toast: IToast = {
-        id: Symbol(),
+        id: Symbol(`toast_${Date.now()}`),
         type,
         message,
         title: config?.title,
@@ -23,10 +33,35 @@ export const useNotificationsStore = defineStore("notifications", {
       };
 
       this.toasts.push(toast);
+
+      nextTick(() => {
+        const toastElement = document.querySelector(
+          `[data-toast-id="${toast.id.description}"]`
+        );
+        if (toastElement) {
+          const bsToast = new Toast(toastElement, {
+            autohide: config?.timeout !== 0,
+            delay: toast.timeout,
+          });
+          bsToast.show();
+
+          toastElement.addEventListener("hidden.bs.toast", () => {
+            this.removeToast(toast.id);
+          });
+        }
+      });
     },
 
     removeToast(id: symbol) {
-      this.toasts = this.toasts.filter((t) => t.id !== id);
+      const index = this.toasts.findIndex((t) => t.id === id);
+      if (index > -1) {
+        const toast = this.toasts[index];
+        if (toast.element) {
+          const bsToast = Toast.getInstance(toast.element);
+          bsToast?.dispose();
+        }
+        this.toasts.splice(index, 1);
+      }
     },
   },
 

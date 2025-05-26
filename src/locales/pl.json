@@ -6,12 +6,20 @@
     "form": "Formularz",
     "reviews": "Recenzje"
   },
+  "toast": {
+    "success": "Sukces!",
+    "error": "Błąd!",
+    "warning": "Ostrzeżenie",
+    "info": "Informacja"
+  },
   "common": {
     "loading": "Ładowanie...",
     "loadingMessage": "Przetwarzanie...",
     "close": "Zamknij",
     "cancel": "Anuluj",
-    "backToGallery": "Powrót do Galerii"
+    "backToGallery": "Powrót do Galerii",
+    "darkMode": "Tryb ciemny",
+    "lightMode": "Tryb jasny"
   },
   "notifications": {
     "submitSuccess": "Recenzja została pomyślnie wysłana!",
@@ -31,6 +39,7 @@
     "privacyPolicy": "Polityka Prywatności"
   },
   "form": {
+    "reviewOrDocumentRequired": "Wymagane jest wypełnienie recenzji lub załączenie dokumentu",
     "title": "Zgłoś Recenzję Gry",
     "description": "Podziel się opinią o najnowszych tytułach! Najlepsze recenzje zostaną opublikowane i nagrodzone.",
     "formTitle": "Formularz Recenzji",
@@ -100,6 +109,8 @@
     "last2": "Zajrzyj do naszej galerii, poznaj szczegóły gier i skorzystaj z formularza, aby się z nami skontaktować. Granie zaczyna się tutaj!"
   },
   "reviews": {
+    "loginSuccess": "Poprawne zalogowanie!",
+    "logoutSuccess": "Poprawne wylogowanie!",
     "password": "Hasło administratora",
     "searchPlaceholder": "Szukaj recenzji...",
     "authorization": "Autoryzacja administratora",
@@ -121,7 +132,8 @@
     "next": "następna",
     "submitted": "Zgłoszone recenzje",
     "noName": "Brak nazwy",
-    "authFailed": "Nieprawidłowe hasło. Spróbuj ponownie."
+    "authFailed": "Nieprawidłowe hasło. Spróbuj ponownie.",
+    "editPlaceholder": "Edytuj recenzję..."
   },
   "photo": {
     "photo.notFound": "Zdjęcie nie zostało znalezione",

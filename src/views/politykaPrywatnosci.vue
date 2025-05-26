@@ -84,4 +84,40 @@ export default {
     font-size: 0.95rem;
   }
 }
+
+.dark-mode h1,
+.dark-mode .h4,
+.dark-mode .card-title {
+  color: #e0e0e0 !important;
+}
+
+.dark-mode h1 {
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .h4 {
+  position: relative;
+  padding-left: 15px;
+}
+
+.dark-mode .h4::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 60%;
+  width: 3px;
+  background: var(--bs-primary);
+  border-radius: 2px;
+}
+
+.dark-mode .text-muted {
+  color: #b0b0b0 !important;
+}
+
+.dark-mode .bg-light {
+  background-color: #333 !important;
+  border-color: #444 !important;
+}
 </style>

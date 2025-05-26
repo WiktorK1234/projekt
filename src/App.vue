@@ -1,5 +1,8 @@
 <template>
-  <div class="min-vh-100 d-flex flex-column">
+  <div
+    class="min-vh-100 d-flex flex-column"
+    :class="{ 'dark-mode': settings.darkMode }"
+  >
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
       <div class="container">
         <router-link to="/" class="navbar-brand fw-bold">
@@ -62,6 +65,21 @@
               </router-link>
             </li>
             <li class="nav-item">
+              <button
+                class="btn btn-link nav-link"
+                @click="toggleDarkMode"
+                :title="
+                  $t(settings.darkMode ? 'common.lightMode' : 'common.darkMode')
+                "
+              >
+                <i
+                  :class="
+                    settings.darkMode ? 'bi bi-sun-fill' : 'bi bi-moon-fill'
+                  "
+                ></i>
+              </button>
+            </li>
+            <li class="nav-item">
               <select
                 v-model="$i18n.locale"
                 class="form-select ms-2"
@@ -94,36 +112,42 @@
       </div>
     </div>
 
+    <!-- App.vue - poprawiony fragment toastów -->
     <div class="toast-container position-fixed bottom-0 end-0 p-3">
       <transition-group name="toast-transition">
-        <template
-          v-for="(toast, index) in notifications.activeToasts"
-          :key="toast.id"
+        <div
+          v-for="toast in notifications.activeToasts"
+          :key="toast.id.description"
+          class="toast"
+          :class="`bg-${toast.type} text-white`"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+          :data-toast-id="toast.id.description"
         >
-          <div
-            ref="toastElements"
-            class="toast"
-            :class="`bg-${toast.type} text-white`"
-            role="alert"
-            aria-live="assertive"
-            aria-atomic="true"
-            :data-bs-delay="toast.timeout"
-          >
-            <div class="toast-header">
-              <i class="bi me-2" :class="getToastIcon(toast.type)"></i>
-              <strong class="me-auto">{{
-                toast.title || $t(`toast.${toast.type}`)
-              }}</strong>
-              <button
-                type="button"
-                class="btn-close btn-close-white"
-                data-bs-dismiss="toast"
-                :aria-label="$t('common.close')"
-              ></button>
-            </div>
-            <div class="toast-body">{{ toast.message }}</div>
+          <div class="toast-header">
+            <i
+              class="bi me-2"
+              :class="{
+                'bi-check-circle-fill text-success': toast.type === 'success',
+                'bi-x-circle-fill text-danger': toast.type === 'error',
+                'bi-exclamation-triangle-fill text-warning':
+                  toast.type === 'warning',
+                'bi-info-circle-fill text-info': toast.type === 'info',
+              }"
+            ></i>
+            <strong class="me-auto">{{
+              toast.title || $t(`toast.${toast.type}`)
+            }}</strong>
+            <button
+              type="button"
+              class="btn-close btn-close-white"
+              data-bs-dismiss="toast"
+              @click="notifications.removeToast(toast.id)"
+            ></button>
           </div>
-        </template>
+          <div class="toast-body">{{ toast.message }}</div>
+        </div>
       </transition-group>
     </div>
 
@@ -181,23 +205,18 @@
 </template>
 
 <script setup lang="ts">
-import {
-  ref,
-  watch,
-  nextTick,
-  onMounted,
-  onBeforeUnmount,
-  computed,
-} from "vue";
-import { Collapse, Toast } from "bootstrap";
+import { ref, watch, onMounted } from "vue";
+import { Collapse, Toast, Modal } from "bootstrap";
 import { useNotificationsStore } from "@/stores/notifications";
 import type { ToastType } from "@/stores/notifications";
 import { useLoadingStore } from "@/stores/loading";
 import { useI18n } from "vue-i18n";
+import { useSettingsStore } from "@/stores/settings";
 
 const { t } = useI18n();
 const notifications = useNotificationsStore();
 const loading = useLoadingStore();
+const settings = useSettingsStore();
 const toastElements = ref<HTMLElement[]>([]);
 const navbarCollapseRef = ref<HTMLElement | null>(null);
 let navbarCollapse: Collapse | null = null;
@@ -208,6 +227,7 @@ onMounted(() => {
       toggle: false,
     });
   }
+  settings.applyDarkMode();
 });
 
 const toggleNavbar = () => {
@@ -215,6 +235,11 @@ const toggleNavbar = () => {
   if (!navbarCollapseRef.value?.classList.contains("show")) {
     navbarCollapse.show();
   }
+};
+
+const toggleDarkMode = () => {
+  settings.toggleDarkMode();
+  closeNavbarOnMobile();
 };
 
 const closeNavbarOnMobile = () => {
@@ -242,29 +267,46 @@ const getToastIcon = (type: ToastType) => {
 };
 
 watch(
-  () => notifications.activeToasts,
-  async (newToasts) => {
-    await nextTick();
+  () => settings.darkMode,
+  (newVal) => {
+    document.querySelectorAll(".modal.show").forEach((modalElement) => {
+      const modal = Modal.getInstance(modalElement);
+      if (modal) {
+        modal.handleUpdate();
 
-    newToasts.forEach((toast, index) => {
-      const element = toastElements.value[index];
-      if (element && !(element as any)._toast) {
-        const bsToast = new Toast(element, {
-          autohide: true,
-          delay: toast.timeout,
-        });
+        const focusableElements = modalElement.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
 
-        (element as any)._toast = bsToast;
+        if (focusableElements.length > 0) {
+          const firstElement = focusableElements[0] as HTMLElement;
+          const lastElement = focusableElements[
+            focusableElements.length - 1
+          ] as HTMLElement;
 
-        element.addEventListener("hidden.bs.toast", () => {
-          notifications.removeToast(toast.id);
-        });
+          const handleTab = (e: KeyboardEvent) => {
+            if (e.key === "Tab") {
+              if (e.shiftKey && document.activeElement === firstElement) {
+                e.preventDefault();
+                lastElement.focus();
+              } else if (
+                !e.shiftKey &&
+                document.activeElement === lastElement
+              ) {
+                e.preventDefault();
+                firstElement.focus();
+              }
+            }
+          };
 
-        bsToast.show();
+          modalElement.addEventListener("keydown", handleTab);
+
+          firstElement.focus();
+        }
       }
     });
   },
-  { deep: true }
+  { immediate: true }
 );
 </script>
 
@@ -363,5 +405,55 @@ watch(
 .toast-transition-leave-to {
   opacity: 0;
   transform: scale(0.8);
+}
+
+.dark-mode {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+}
+
+.dark-mode .card {
+  background-color: #2d2d2d;
+  border-color: #404040;
+}
+
+.dark-mode .list-group-item {
+  background-color: #2d2d2d;
+  color: #e0e0e0;
+  border-color: #404040;
+}
+
+.dark-mode .form-control {
+  background-color: #333;
+  border-color: #555;
+  color: #fff;
+}
+
+.dark-mode .form-control:focus {
+  background-color: #444;
+  border-color: #666;
+  color: #fff;
+}
+
+.dark-mode .alert-info {
+  background-color: #004466;
+  border-color: #005588;
+}
+
+.dark-mode .text-muted {
+  color: #a0a0a0 !important;
+}
+
+.dark-mode .table {
+  color: #e0e0e0;
+}
+
+.dark-mode .modal-content {
+  background-color: #2d2d2d;
+}
+
+.dark-mode .toast {
+  background-color: #333 !important;
+  color: #fff !important;
 }
 </style>

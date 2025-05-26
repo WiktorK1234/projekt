@@ -3,5 +3,6 @@ export default interface Toast {
   type: "success" | "error" | "warning" | "info";
   message: string;
   title?: string;
-  timeout: number;
+  timeout?: number;
+  element?: HTMLElement;
 }

@@ -1,4 +1,5 @@
 export default interface ReviewSubmission {
+  id: string;
   gameTitle: string;
   nickname: string;
   hoursPlayed: number;

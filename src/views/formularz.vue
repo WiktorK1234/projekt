@@ -99,9 +99,8 @@
           type="file"
           class="form-control"
           name="textDocument"
-          :key="'doc_' + locale"
           accept=".doc,.docx,.pdf"
-          @change="handleFileChange"
+          @change="(e) => handleFileChange(e, 'textDocument')"
         />
         <ErrorMessage
           name="textDocument"
@@ -120,7 +119,6 @@
           type="file"
           class="form-control"
           name="screenshots"
-          :key="'screenshots_' + locale"
           accept="image/*"
           multiple
           @change="(e) => handleFileChange(e, 'screenshots')"
@@ -146,7 +144,6 @@
           type="file"
           class="form-control"
           name="videoReview"
-          :key="'video_' + locale"
           accept="video/*"
           @change="(e) => handleFileChange(e, 'videoReview')"
         />
@@ -192,9 +189,9 @@ import * as yup from "yup";
 import { useFormStore } from "../stores/formDane";
 import { useNotificationsStore } from "@/stores/notifications";
 import { useLoadingStore } from "@/stores/loading";
-import ReviewSubmission from "@/models/IReview";
 import { useI18n } from "vue-i18n";
 
+const { t, locale } = useI18n();
 const formStore = useFormStore();
 
 const popularGames = ref([
@@ -210,11 +207,13 @@ const isSubmitting = ref(false);
 const notifications = useNotificationsStore();
 const hasTextDocument = computed(() => !!textDocumentFile.value);
 const formKey = ref(0);
-const { t, locale } = useI18n();
 
-const validationSchema = computed(() =>
-  yup.object({
-    gameTitle: yup.string().required(t("form.validation.gameTitleRequired")),
+const getFileExtension = (filename: string) =>
+  filename.split(".").pop()?.toLowerCase();
+
+const validationSchema = computed(() => {
+  return yup.object({
+    gameTitle: yup.string().required(t("form.gameTitleRequired")),
     nickname: yup
       .string()
       .required(t("form.nicknameRequired"))
@@ -226,12 +225,32 @@ const validationSchema = computed(() =>
       .min(1, t("form.hoursMin"))
       .max(10000, t("form.hoursMax"))
       .required(t("form.required")),
-    review: yup.string().when("textDocument", {
-      is: (file: File) => !file,
-      then: (schema) =>
-        schema.required(t("form.reviewRequired")).min(500, t("form.reviewMin")),
-      otherwise: (schema) => schema,
-    }),
+    review: yup
+      .string()
+      .test(
+        "content-requirement",
+        t("form.reviewOrDocumentRequired"),
+        function (value) {
+          if (value?.trim().length >= 500) return true;
+
+          const document = this.parent.textDocument;
+          if (!document) return false;
+
+          if (document.size > 5 * 1024 * 1024) return false;
+
+          const validTypes = [
+            "application/pdf",
+            "application/msword",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          ];
+          const validExtensions = ["pdf", "doc", "docx"];
+
+          return (
+            validTypes.includes(document.type) ||
+            validExtensions.includes(getFileExtension(document.name))
+          );
+        }
+      ),
     textDocument: yup
       .mixed()
       .test(
@@ -239,17 +258,17 @@ const validationSchema = computed(() =>
         t("form.fileSize"),
         (value) => !value || value.size <= 5 * 1024 * 1024
       )
-      .test(
-        "fileType",
-        t("form.fileTypeDocs"),
-        (value) =>
-          !value ||
+      .test("fileType", t("form.fileTypeDocs"), (value) => {
+        if (!value) return true;
+        return (
           [
             "application/pdf",
             "application/msword",
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-          ].includes(value.type)
-      ),
+          ].includes(value.type) ||
+          ["pdf", "doc", "docx"].includes(getFileExtension(value.name))
+        );
+      }),
     screenshots: yup
       .mixed()
       .test(
@@ -257,17 +276,21 @@ const validationSchema = computed(() =>
         t("form.fileSize"),
         (value) =>
           !value ||
-          Array.from(value).every((file: File) => file.size <= 5 * 1024 * 1024)
-      )
-      .test(
-        "fileType",
-        t("form.fileTypeImages"),
-        (value) =>
-          !value ||
-          Array.from(value).every((file: File) =>
-            ["image/jpeg", "image/png"].includes(file.type)
+          Array.from(value as File[]).every(
+            (file) => file.size <= 5 * 1024 * 1024
           )
-      ),
+      )
+      .test("fileType", t("form.fileTypeImages"), (value) => {
+        if (!value) return true;
+        return Array.from(value as File[]).every((file) => {
+          const validTypes = ["image/jpeg", "image/png"];
+          const validExtensions = ["jpg", "jpeg", "png"];
+          return (
+            validTypes.includes(file.type) ||
+            validExtensions.includes(getFileExtension(file.name))
+          );
+        });
+      }),
     videoReview: yup
       .mixed()
       .test(
@@ -275,36 +298,42 @@ const validationSchema = computed(() =>
         t("form.videoFileSize"),
         (value) => !value || value.size <= 100 * 1024 * 1024
       )
-      .test(
-        "fileType",
-        t("form.fileTypeVideo"),
-        (value) =>
-          !value || ["video/mp4", "video/x-msvideo"].includes(value.type)
-      ),
-  })
-);
-
-const { handleSubmit, resetForm, meta, setFieldValue, values } = useForm({
-  validationSchema: validationSchema.value,
+      .test("fileType", t("form.fileTypeVideo"), (value) => {
+        if (!value) return true;
+        const validTypes = ["video/mp4", "video/x-msvideo"];
+        const validExtensions = ["mp4", "avi"];
+        return (
+          validTypes.includes(value.type) ||
+          validExtensions.includes(getFileExtension(value.name))
+        );
+      }),
+  });
 });
 
-const handleFileUpload = (event: Event, fieldName: string) => {
+const { handleSubmit, resetForm, meta, setFieldValue, values } = useForm({
+  validationSchema: validationSchema,
+});
+
+const handleFileChange = (event: Event, field: string) => {
   const input = event.target as HTMLInputElement;
-  const files = input.multiple ? input.files : input.files?.[0] || null;
-  setFieldValue(fieldName, files);
-  if (fieldName === "textDocument") {
-    textDocumentFile.value = files as File | null;
+  const files = input.files;
+
+  if (!files || files.length === 0) {
+    setFieldValue(field, null);
+    if (field === "textDocument") textDocumentFile.value = null;
+    return;
   }
+
+  const fileList = input.multiple ? Array.from(files) : files[0];
+  setFieldValue(field, fileList);
 };
 
 const onSubmit = handleSubmit(async (values) => {
   const loading = useLoadingStore();
   isSubmitting.value = true;
-
   try {
     loading.start();
-
-    const submissionData: ReviewSubmission = {
+    const submissionData = {
       gameTitle: values.gameTitle,
       nickname: values.nickname,
       hoursPlayed: Number(values.hoursPlayed),
@@ -314,22 +343,21 @@ const onSubmit = handleSubmit(async (values) => {
       screenshots: values.screenshots,
       videoReview: values.videoReview,
     };
+
     await formStore.addSubmission(submissionData);
-
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    resetForm();
 
+    resetForm();
     setFieldValue("textDocument", null);
     setFieldValue("screenshots", null);
     setFieldValue("videoReview", null);
     textDocumentFile.value = null;
-
     formKey.value++;
+
     notifications.showToast("success", t("notifications.submitSuccess"), {
       title: t("notifications.successTitle"),
     });
   } catch (error) {
-    console.error(error);
     notifications.showToast("error", t("notifications.submitError"), {
       title: t("notifications.errorTitle"),
     });
@@ -341,28 +369,23 @@ const onSubmit = handleSubmit(async (values) => {
 
 const cancel = () => {
   resetForm();
+  setFieldValue("textDocument", null);
+  setFieldValue("screenshots", null);
+  setFieldValue("videoReview", null);
   textDocumentFile.value = null;
-};
 
-const handleFileChange = (event: Event, field: string) => {
-  const input = event.target as HTMLInputElement;
-  const files = input.files;
+  formKey.value++;
 
-  if (files) {
-    setFieldValue(field, input.multiple ? Array.from(files) : files[0]);
-  }
+  const fileInputs = document.querySelectorAll('input[type="file"]');
+  fileInputs.forEach((input: HTMLInputElement) => {
+    input.value = "";
+  });
 };
 
 watch(locale, () => {
   setFieldValue("textDocument", null);
   setFieldValue("screenshots", null);
   setFieldValue("videoReview", null);
-
-  const fileInputs = document.querySelectorAll('input[type="file"]');
-  fileInputs.forEach((input: HTMLInputElement) => {
-    input.value = "";
-  });
-
   formKey.value++;
 });
 </script>
@@ -389,12 +412,10 @@ watch(locale, () => {
   .form-label {
     font-size: 0.9rem !important;
   }
-
   .form-control {
     padding: 0.5rem;
     font-size: 0.9rem;
   }
-
   .btn {
     font-size: 0.85rem;
   }
